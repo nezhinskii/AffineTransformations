@@ -1,0 +1,32 @@
+import 'package:flutter/material.dart';
+import 'package:graphics_lab6/widgets/hiding_panel.dart';
+import 'package:graphics_lab6/widgets/polyhedron_picker.dart';
+import 'package:graphics_lab6/widgets/projcetion_picker/projection_picker.dart';
+import 'package:graphics_lab6/widgets/rotation_picker.dart';
+
+class ToolBar extends StatelessWidget {
+  const ToolBar({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return const SingleChildScrollView(
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+      child: Column(
+        children: [
+          HidingPanel(
+            title: Text("Тип проекции"),
+            child: ProjectionPicker()
+          ),
+          HidingPanel(
+            title: Text("Многогранник"),
+            child: PolyhedronPicker()
+          ),
+          HidingPanel(
+            title: Text("Вращение"),
+            child: RotationPicker()
+          )
+        ],
+      )
+    );
+  }
+}
