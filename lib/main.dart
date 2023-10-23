@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:graphics_lab6/app_painter.dart';
 import 'package:graphics_lab6/bloc/main_bloc.dart';
-import 'package:graphics_lab6/widgets/rotation_picker.dart';
+import 'package:graphics_lab6/disco_model.dart';
 import 'package:graphics_lab6/widgets/toolbar.dart';
 
 void main() {
@@ -31,15 +31,28 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MainPage extends StatelessWidget {
+class MainPage extends StatefulWidget {
   const MainPage({Key? key}) : super(key: key);
+
+  @override
+  State<MainPage> createState() => _MainPageState();
+}
+
+class _MainPageState extends State<MainPage> {
+  final _discoModel = DiscoModel();
+
+  @override
+  void dispose() async {
+    await _discoModel.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Material(
       child: Scaffold(
-        body: RepositoryProvider(
-          create: (context) => SecretModel(),
+        body: RepositoryProvider.value(
+          value: _discoModel,
           child: BlocBuilder<MainBloc, MainState>(
             builder: (context, state) {
               return Row(
@@ -50,20 +63,68 @@ class MainPage extends StatelessWidget {
                     child: ToolBar()
                   ),
                   Expanded(
-                    child: ClipRRect(
-                      child: CustomPaint(
-                        foregroundPainter: AppPainter(
-                          projection: state.projection,
-                          polyhedron: state.polyhedron,
-                          secretFeature: context.read<SecretModel>().secret
+                    child: Stack(
+                      children: [
+                        ClipRRect(
+                          child: CustomPaint(
+                            foregroundPainter: AppPainter(
+                              projection: state.projection,
+                              polyhedron: state.polyhedron,
+                              secretFeature: context.read<DiscoModel>().isEnabled
+                            ),
+                            child: Container(
+                              color: context.watch<DiscoModel>().isEnabled ?
+                                context.watch<DiscoModel>().color : Colors.white,
+                              width: double.infinity,
+                              height: double.infinity,
+                            ),
+                          ),
                         ),
-                        child: Container(
-                          color: context.watch<SecretModel>().secret ?
-                            Color((Random().nextDouble() * 0xFFFFFF).toInt()).withOpacity(0.6) : Colors.white,
-                          width: double.infinity,
-                          height: double.infinity,
+                        Align(
+                          alignment: Alignment.bottomRight,
+                          child: Visibility(
+                            visible: context.read<DiscoModel>().isEnabled,
+                            child: SizedBox(
+                              height: MediaQuery.of(context).size.height / 2 - 100,
+                              width: MediaQuery.of(context).size.width / 2 - 200,
+                              child: Image.asset('assets/gifs/dance.gif', fit: BoxFit.contain,)
+                            ),
+                          ),
                         ),
-                      ),
+                        Align(
+                          alignment: Alignment.topRight,
+                          child: Visibility(
+                            visible: context.read<DiscoModel>().isEnabled,
+                            child: SizedBox(
+                              height: MediaQuery.of(context).size.height / 2 - 100,
+                              width: MediaQuery.of(context).size.width / 2  - 200,
+                              child: Image.asset('assets/gifs/spongebob.gif', fit: BoxFit.contain,)
+                            ),
+                          ),
+                        ),
+                        Align(
+                          alignment: Alignment.topLeft,
+                          child: Visibility(
+                            visible: context.read<DiscoModel>().isEnabled,
+                            child: SizedBox(
+                              height: MediaQuery.of(context).size.height / 2 - 100,
+                              width: MediaQuery.of(context).size.width / 2  - 200,
+                              child: Image.asset('assets/gifs/patrick.gif', fit: BoxFit.contain,)
+                            ),
+                          ),
+                        ),
+                        Align(
+                          alignment: Alignment.bottomLeft,
+                          child: Visibility(
+                            visible: context.read<DiscoModel>().isEnabled,
+                            child: SizedBox(
+                              height: MediaQuery.of(context).size.height / 2 - 100,
+                              width: MediaQuery.of(context).size.width / 2  - 200,
+                              child: Image.asset('assets/gifs/lizard.gif', fit: BoxFit.contain,)
+                            ),
+                          ),
+                        )
+                      ],
                     ),
                   ),
                 ],

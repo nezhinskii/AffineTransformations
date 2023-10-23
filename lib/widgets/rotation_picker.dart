@@ -3,13 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:graphics_lab6/bloc/main_bloc.dart';
+import 'package:graphics_lab6/disco_model.dart';
 import 'package:graphics_lab6/primtives.dart';
 import 'package:graphics_lab6/widgets/snack_bar.dart';
-
-class SecretModel{
-  bool secret;
-  SecretModel() : secret = false;
-}
 
 class RotationPicker extends StatefulWidget {
   const RotationPicker({Key? key}) : super(key: key);
@@ -36,6 +32,7 @@ class _RotationPickerState extends State<RotationPicker> {
     setState(() {
       _isAnimationRunning = false;
     });
+    context.read<DiscoModel>().isEnabled = false;
     _timer.cancel();
   }
 
@@ -44,7 +41,7 @@ class _RotationPickerState extends State<RotationPicker> {
       _isAnimationRunning = true;
     });
     _timer = Timer.periodic(
-      const Duration(milliseconds: 10),
+      const Duration(milliseconds: 5),
           (timer) {
         final center = context.read<MainBloc>().state.polyhedron.center;
         context.read<MainBloc>().add(RotatePolyhedron(Edge(center, center + Point3D(1, 0 ,0)), 1));
@@ -105,11 +102,11 @@ class _RotationPickerState extends State<RotationPicker> {
                 Icons.pause_circle_outline : Icons.play_circle_outline)
             ),
             Checkbox(
-              value: context.read<SecretModel>().secret,
+              value: context.read<DiscoModel>().isEnabled,
               onChanged: (value) {
-                if (value != null){
+                if (_isAnimationRunning && value != null){
                   setState(() {
-                    context.read<SecretModel>().secret = value;
+                    context.read<DiscoModel>().isEnabled = value;
                   });
                 }
               },
