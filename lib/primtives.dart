@@ -174,40 +174,42 @@ class Polyhedron implements IPoints {
 
   static get dodecahedron {
     final double iphi = 1 / phi;
-    return Polyhedron([
-      Point3D(1, 1, 1), // 0
-      Point3D(1, 1, -1), // 1
-      Point3D(1, -1, 1), // 2
-      Point3D(1, -1, -1), // 3
-      Point3D(-1, 1, 1), // 4
-      Point3D(-1, 1, -1), // 5
-      Point3D(-1, -1, 1), // 6
-      Point3D(-1, -1, -1), // 7
-      Point3D(0, phi, iphi), // 8
-      Point3D(0, phi, -iphi), // 9
-      Point3D(0, -phi, iphi), // 10
-      Point3D(0, -phi, -iphi), // 11
-      Point3D(iphi, 0, phi), // 12
-      Point3D(-iphi, 0, phi), // 13
-      Point3D(iphi, 0, -phi), // 14
-      Point3D(-iphi, 0, -phi), // 15
-      Point3D(phi, iphi, 0), // 16
-      Point3D(phi, -iphi, 0), // 17
-      Point3D(-phi, iphi, 0), // 18
-      Point3D(-phi, -iphi, 0), // 19
-    ], [
-      [8, 9, 1, 16, 0],
-      [8, 9, 5, 18, 4],
-      [10, 11, 3, 17, 2],
-      [10, 11, 7, 19, 6],
-      [12, 13, 4, 8, 0],
-      [12, 13, 6, 10, 2],
-      [14, 15, 5, 9, 1],
-      [14, 15, 7, 11, 3],
-      [16, 17, 2, 12, 0],
-      [16, 17, 3, 14, 1],
-      [18, 19, 6, 13, 4],
-      [18, 19, 7, 15, 5],
-    ]);
+    return Polyhedron(
+        [
+          Point3D(1, 1, 1), // 0
+          Point3D(1, 1, -1), // 1
+          Point3D(1, -1, 1), // 2
+          Point3D(1, -1, -1), // 3
+          Point3D(-1, 1, 1), // 4
+          Point3D(-1, 1, -1), // 5
+          Point3D(-1, -1, 1), // 6
+          Point3D(-1, -1, -1), // 7
+          Point3D(0, phi, iphi), // 8
+          Point3D(0, phi, -iphi), // 9
+          Point3D(0, -phi, iphi), // 10
+          Point3D(0, -phi, -iphi), // 11
+          Point3D(iphi, 0, phi), // 12
+          Point3D(-iphi, 0, phi), // 13
+          Point3D(iphi, 0, -phi), // 14
+          Point3D(-iphi, 0, -phi), // 15
+          Point3D(phi, iphi, 0), // 16
+          Point3D(phi, -iphi, 0), // 17
+          Point3D(-phi, iphi, 0), // 18
+          Point3D(-phi, -iphi, 0), // 19
+        ].map((e) => e / phi).toList(),
+        [
+          [8, 9, 1, 16, 0],
+          [8, 9, 5, 18, 4],
+          [10, 11, 3, 17, 2],
+          [10, 11, 7, 19, 6],
+          [12, 13, 4, 8, 0],
+          [12, 13, 6, 10, 2],
+          [14, 15, 5, 9, 1],
+          [14, 15, 7, 11, 3],
+          [16, 17, 2, 12, 0],
+          [16, 17, 3, 14, 1],
+          [18, 19, 6, 13, 4],
+          [18, 19, 7, 15, 5],
+        ]);
   }
 }
