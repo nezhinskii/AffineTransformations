@@ -30,3 +30,8 @@ class ScalePolyhedron extends MainEvent{
   final Point3D translation;
   const ScalePolyhedron(this.translation);
 }
+
+class MirrorPolyhedron extends MainEvent{
+  final Planes plane;
+  const MirrorPolyhedron(this.plane);
+}

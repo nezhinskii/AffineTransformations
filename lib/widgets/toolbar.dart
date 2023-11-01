@@ -6,6 +6,8 @@ import 'package:graphics_lab6/widgets/rotation_picker.dart';
 import 'package:graphics_lab6/widgets/scaling_picker.dart';
 import 'package:graphics_lab6/widgets/translation_picker.dart';
 
+import 'mirroring_picker.dart';
+
 class ToolBar extends StatelessWidget {
   const ToolBar({Key? key}) : super(key: key);
 
@@ -34,6 +36,10 @@ class ToolBar extends StatelessWidget {
           HidingPanel(
               title: Text("Масштабирование"),
               child: ScalingPicker(),
+          ),
+          HidingPanel(
+            title: Text("Отражение"),
+            child: MirroringPicker(),
           ),
         ],
       )

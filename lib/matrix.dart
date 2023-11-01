@@ -81,14 +81,17 @@ class Matrix {
     ]
   );
 
+  factory Matrix.mirrorXY() {
+    return Matrix.scaling(Point3D(1,1,-1));
+  }
 
+  factory Matrix.mirrorYZ() {
+    return Matrix.scaling(Point3D(-1,1,1));
+  }
 
-  // Matrix.scaling(double k, double x, double y)
-  //     : this(3, 3, [
-  //   [k,0,0,],
-  //   [0,k,0],
-  //   [-x*(k-1),-y*(k-1), -1],
-  // ]);
+  factory Matrix.mirrorXZ() {
+    return Matrix.scaling(Point3D(1,-1,1));
+  }
 
 
   final List<List<double>> value;

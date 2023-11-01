@@ -4,6 +4,7 @@ import 'package:bloc/bloc.dart';
 import 'package:graphics_lab6/matrix.dart';
 import 'package:graphics_lab6/polyhedron_type.dart';
 import 'package:graphics_lab6/primtives.dart';
+import 'package:graphics_lab6/widgets/mirroring_picker.dart';
 import 'package:meta/meta.dart';
 import 'package:vector_math/vector_math.dart';
 
@@ -21,6 +22,7 @@ class MainBloc extends Bloc<MainEvent, MainState> {
     on<RotatePolyhedron>(_onRotatePolyhedron);
     on<TranslatePolyhedron>(_onTranslatePolyhedron);
     on<ScalePolyhedron>(_onScalePolyhedron);
+    on<MirrorPolyhedron>(_onMirrorPolyhedron);
   }
 
   void _onPickPolyhedron(PickPolyhedron event, Emitter emit) {
@@ -67,5 +69,21 @@ class MainBloc extends Bloc<MainEvent, MainState> {
       ),
     );
     emit(state.copyWith(polyhedron: scaled));
+  }
+
+  void _onMirrorPolyhedron(MirrorPolyhedron event, Emitter emit) {
+    late Matrix matrix;
+    switch (event.plane) {
+      case Planes.xy:
+        matrix = Matrix.mirrorXY();
+      case Planes.xz:
+        matrix = Matrix.mirrorXZ();
+      case Planes.yz:
+        matrix = Matrix.mirrorYZ();
+    }
+    final mirrored = state.polyhedron.getTransformed(
+      matrix
+    );
+    emit(state.copyWith(polyhedron: mirrored));
   }
 }
