@@ -61,6 +61,16 @@ class Matrix {
     ]
   );
 
+  Matrix.scaling(Point3D sc)
+      : this(4, 4,
+      [
+        [sc.x, 0, 0, 0],
+        [0, sc.y, 0, 0],
+        [0, 0, sc.z, 0],
+        [0, 0, 0, 1],
+      ]
+  );
+
   Matrix.rotation(double a, Point3D v)
     : this(4, 4,
     [

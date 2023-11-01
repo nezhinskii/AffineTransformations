@@ -261,7 +261,7 @@ class _RotationPickerState extends State<RotationPicker> {
             context.read<MainBloc>().add(RotatePolyhedron(line, angle));
           },
           child: const Text("Применить")
-        )
+        ),
       ],
     );
   }

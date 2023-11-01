@@ -20,3 +20,13 @@ class RotatePolyhedron extends MainEvent{
   final double angle;
   const RotatePolyhedron(this.line, this.angle);
 }
+
+class TranslatePolyhedron extends MainEvent{
+  final Point3D translation;
+  const TranslatePolyhedron(this.translation);
+}
+
+class ScalePolyhedron extends MainEvent{
+  final Point3D translation;
+  const ScalePolyhedron(this.translation);
+}

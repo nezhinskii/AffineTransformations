@@ -3,6 +3,8 @@ import 'package:graphics_lab6/widgets/hiding_panel.dart';
 import 'package:graphics_lab6/widgets/polyhedron_picker.dart';
 import 'package:graphics_lab6/widgets/projcetion_picker/projection_picker.dart';
 import 'package:graphics_lab6/widgets/rotation_picker.dart';
+import 'package:graphics_lab6/widgets/scaling_picker.dart';
+import 'package:graphics_lab6/widgets/translation_picker.dart';
 
 class ToolBar extends StatelessWidget {
   const ToolBar({Key? key}) : super(key: key);
@@ -24,7 +26,15 @@ class ToolBar extends StatelessWidget {
           HidingPanel(
             title: Text("Вращение"),
             child: RotationPicker()
-          )
+          ),
+          HidingPanel(
+              title: Text("Перемещение"),
+              child: TranslationPicker(),
+          ),
+          HidingPanel(
+              title: Text("Масштабирование"),
+              child: ScalingPicker(),
+          ),
         ],
       )
     );

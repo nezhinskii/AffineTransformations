@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 import 'package:vector_math/vector_math.dart';
 
 part 'main_event.dart';
+
 part 'main_state.dart';
 
 class MainBloc extends Bloc<MainEvent, MainState> {
@@ -18,6 +19,8 @@ class MainBloc extends Bloc<MainEvent, MainState> {
     on<PickPolyhedron>(_onPickPolyhedron);
     on<PickProjection>(_onPickProjection);
     on<RotatePolyhedron>(_onRotatePolyhedron);
+    on<TranslatePolyhedron>(_onTranslatePolyhedron);
+    on<ScalePolyhedron>(_onScalePolyhedron);
   }
 
   void _onPickPolyhedron(PickPolyhedron event, Emitter emit) {
@@ -46,5 +49,23 @@ class MainBloc extends Bloc<MainEvent, MainState> {
     final movedBack =
         rotated.getTransformed(Matrix.translation(event.line.start));
     emit(state.copyWith(polyhedron: movedBack));
+  }
+
+  void _onTranslatePolyhedron(TranslatePolyhedron event, Emitter emit) {
+    final translated = state.polyhedron.getTransformed(
+      Matrix.translation(
+        event.translation,
+      ),
+    );
+    emit(state.copyWith(polyhedron: translated));
+  }
+
+  void _onScalePolyhedron(ScalePolyhedron event, Emitter emit) {
+    final scaled = state.polyhedron.getTransformed(
+      Matrix.scaling(
+        event.translation,
+      ),
+    );
+    emit(state.copyWith(polyhedron: scaled));
   }
 }
