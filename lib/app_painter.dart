@@ -7,7 +7,7 @@ import 'package:graphics_lab6/primtives.dart';
 import 'package:vector_math/vector_math.dart' as vm;
 
 class AppPainter extends CustomPainter{
-  final Polyhedron polyhedron;
+  final Model polyhedron;
   final Matrix projection;
   final bool secretFeature;
 

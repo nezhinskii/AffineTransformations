@@ -2,28 +2,37 @@ part of 'main_bloc.dart';
 
 @immutable
 sealed class MainState {
-  final Polyhedron polyhedron;
+  final Model model;
   final Matrix projection;
+  final String? message;
   const MainState({
-    required this.polyhedron,
-    required this.projection
+    required this.model,
+    required this.projection,
+    this.message
   });
 
   MainState copyWith({
-    Polyhedron? polyhedron,
-    Matrix? projection
+    Model? model,
+    Matrix? projection,
+    String? message
   });
 }
 
 class CommonState extends MainState {
   const CommonState({
-    required super.polyhedron,
+    required super.model,
     required super.projection,
+    super.message
   });
 
   @override
   CommonState copyWith({
-    Polyhedron? polyhedron,
-    Matrix? projection
-  }) => CommonState(polyhedron: polyhedron ?? this.polyhedron, projection: projection ?? this.projection);
+    Model? model,
+    Matrix? projection,
+    String? message
+  }) => CommonState(
+      model: model ?? this.model,
+      projection: projection ?? this.projection,
+      message: message
+  );
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:graphics_lab6/widgets/hiding_panel.dart';
-import 'package:graphics_lab6/widgets/polyhedron_picker.dart';
+import 'package:graphics_lab6/widgets/model_picker/model_picker.dart';
 import 'package:graphics_lab6/widgets/projcetion_picker/projection_picker.dart';
 import 'package:graphics_lab6/widgets/rotation_picker.dart';
 import 'package:graphics_lab6/widgets/scaling_picker.dart';
@@ -22,8 +22,8 @@ class ToolBar extends StatelessWidget {
             child: ProjectionPicker()
           ),
           HidingPanel(
-            title: Text("Многогранник"),
-            child: PolyhedronPicker()
+            title: Text("Модель"),
+            child: ModelPicker()
           ),
           HidingPanel(
             title: Text("Вращение"),

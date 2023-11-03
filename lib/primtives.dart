@@ -50,12 +50,12 @@ class Polygon implements IPoints {
   Polygon(this.points);
 }
 
-class Polyhedron implements IPoints {
+class Model implements IPoints {
   final List<Polygon> polygons;
   @override
   final List<Point3D> points;
   final List<List<int>> _polygonsByIndexes;
-  Polyhedron(this.points, this._polygonsByIndexes) : polygons = [] {
+  Model(this.points, this._polygonsByIndexes) : polygons = [] {
     for (var polygonIndexes in _polygonsByIndexes) {
       polygons.add(Polygon(List.generate(
           polygonIndexes.length, (i) => points[polygonIndexes[i]])));
@@ -70,7 +70,7 @@ class Polyhedron implements IPoints {
     return sum / points.length;
   }
 
-  Polyhedron getTransformed(Matrix transform) {
+  Model getTransformed(Matrix transform) {
     final res = copy();
     for (var point in res.points) {
       point.updateWithVector(Matrix.point(point) * transform);
@@ -78,13 +78,13 @@ class Polyhedron implements IPoints {
     return res;
   }
 
-  Polyhedron copy() {
-    return Polyhedron(
+  Model copy() {
+    return Model(
         List.generate(points.length, (index) => points[index].copy()),
         _polygonsByIndexes);
   }
 
-  static Polyhedron get cube => Polyhedron([
+  static Model get cube => Model([
         Point3D(1, 0, 0),
         Point3D(1, 1, 0),
         Point3D(0, 1, 0),
@@ -102,7 +102,7 @@ class Polyhedron implements IPoints {
         [3, 2, 5, 4],
       ]);
 
-  static get tetrahedron => Polyhedron([
+  static get tetrahedron => Model([
         Point3D(1, 0, 0),
         Point3D(0, 0, 1),
         Point3D(0, 1, 0),
@@ -114,7 +114,7 @@ class Polyhedron implements IPoints {
         [0, 1, 3]
       ]);
 
-  static get octahedron => Polyhedron([
+  static get octahedron => Model([
         Point3D(0.5, 1, 0.5),
         Point3D(0.5, 0.5, 1),
         Point3D(0, 0.5, 0.5),
@@ -134,7 +134,7 @@ class Polyhedron implements IPoints {
 
   static double phi = (1 + sqrt(5)) / 2;
 
-  static get icosahedron => Polyhedron(
+  static get icosahedron => Model(
           [
             Point3D(0, phi, 1),
             Point3D(0, phi, -1),
@@ -174,7 +174,7 @@ class Polyhedron implements IPoints {
 
   static get dodecahedron {
     final double iphi = 1 / phi;
-    return Polyhedron(
+    return Model(
         [
           Point3D(1, 1, 1), // 0
           Point3D(1, 1, -1), // 1

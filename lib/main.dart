@@ -53,7 +53,20 @@ class _MainPageState extends State<MainPage> {
       child: Scaffold(
         body: RepositoryProvider.value(
           value: _discoModel,
-          child: BlocBuilder<MainBloc, MainState>(
+          child: BlocConsumer<MainBloc, MainState>(
+            listener: (context, state) {
+              if (state.message != null) {
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  behavior: SnackBarBehavior.floating,
+                  width: 700,
+                  content: Text(
+                    state.message!,
+                    textAlign: TextAlign.center,
+                  ),
+                ));
+              }
+            },
             builder: (context, state) {
               return Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -69,7 +82,7 @@ class _MainPageState extends State<MainPage> {
                           child: CustomPaint(
                             foregroundPainter: AppPainter(
                               projection: state.projection,
-                              polyhedron: state.polyhedron,
+                              polyhedron: state.model,
                               secretFeature: context.read<DiscoModel>().isEnabled
                             ),
                             child: Container(

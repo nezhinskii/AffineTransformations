@@ -43,14 +43,14 @@ class _RotationPickerState extends State<RotationPicker> {
     _timer = Timer.periodic(
       const Duration(milliseconds: 5),
           (timer) {
-        final center = context.read<MainBloc>().state.polyhedron.center;
-        context.read<MainBloc>().add(RotatePolyhedron(Edge(center, center + Point3D(1, 0 ,0)), 1));
+        final center = context.read<MainBloc>().state.model.center;
+        // context.read<MainBloc>().add(RotatePolyhedron(Edge(center, center + Point3D(1, 0 ,0)), 1));
         if (timer.tick % 2 == 0) {
           context.read<MainBloc>().add(RotatePolyhedron(Edge(center, center + Point3D(0, 1 ,0)), 1));
         }
-        if (timer.tick % 3 == 0) {
-          context.read<MainBloc>().add(RotatePolyhedron(Edge(center, center + Point3D(0, 0 ,1)), 1));
-        }
+        // if (timer.tick % 3 == 0) {
+        //   context.read<MainBloc>().add(RotatePolyhedron(Edge(center, center + Point3D(0, 0 ,1)), 1));
+        // }
       },
     );
   }
@@ -64,7 +64,7 @@ class _RotationPickerState extends State<RotationPicker> {
   }
 
   Edge? _getLine() {
-    final center = context.read<MainBloc>().state.polyhedron.center;
+    final center = context.read<MainBloc>().state.model.center;
     late final Edge? customEdge;
     if (_rotationLineType == _RotationLineType.custom){
       final x1 = double.tryParse(_x1Controller.text),

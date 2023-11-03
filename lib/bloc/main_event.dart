@@ -15,6 +15,12 @@ class PickProjection extends MainEvent{
   const PickProjection(this.matrix);
 }
 
+class PickFunction extends MainEvent{
+  final double Function(double, double) func;
+  final String restrictions;
+  const PickFunction(this.func, this.restrictions);
+}
+
 class RotatePolyhedron extends MainEvent{
   final Edge line;
   final double angle;
