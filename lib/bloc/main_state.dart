@@ -36,3 +36,27 @@ class CommonState extends MainState {
       message: message
   );
 }
+
+class CurveDrawingState extends MainState {
+  const CurveDrawingState({
+    required super.model,
+    required super.projection,
+    super.message,
+    required this.path,
+  });
+
+  final Path path;
+
+  @override
+  CurveDrawingState copyWith({
+    Model? model,
+    Matrix? projection,
+    String? message,
+    Path? path
+  }) => CurveDrawingState(
+      model: model ?? this.model,
+      projection: projection ?? this.projection,
+      message: message,
+      path: path ?? this.path
+  );
+}

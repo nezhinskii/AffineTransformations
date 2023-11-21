@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:graphics_lab6/app_painter.dart';
+import 'package:graphics_lab6/painters/app_painter.dart';
 import 'package:graphics_lab6/bloc/main_bloc.dart';
 import 'package:graphics_lab6/disco_model.dart';
 import 'package:graphics_lab6/widgets/toolbar.dart';
