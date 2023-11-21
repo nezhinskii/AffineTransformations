@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:graphics_lab6/bloc/main_bloc.dart';
 import 'package:graphics_lab6/polyhedron_type.dart';
 import 'package:graphics_lab6/widgets/model_picker/function_radio.dart';
+import 'package:graphics_lab6/widgets/model_picker/rfigure_radio.dart';
 
 class ModelPicker extends StatefulWidget {
   const ModelPicker({Key? key}) : super(key: key);
@@ -20,8 +21,8 @@ class _ModelPickerState extends State<ModelPicker> {
     context.read<MainBloc>().add(const PickPolyhedron(PolyhedronType.cube));
   }
 
-  void _updateRadioIndex(int? newIndex){
-    if (newIndex == null){
+  void _updateRadioIndex(int? newIndex) {
+    if (newIndex == null) {
       return;
     }
     setState(() {
@@ -29,9 +30,9 @@ class _ModelPickerState extends State<ModelPicker> {
     });
   }
 
-  void _pickPolyhedron(int? newIndex){
+  void _pickPolyhedron(int? newIndex) {
     _updateRadioIndex(newIndex);
-    final event = switch(_currentIndex){
+    final event = switch (_currentIndex) {
       0 => const PickPolyhedron(PolyhedronType.tetrahedron),
       1 => const PickPolyhedron(PolyhedronType.cube),
       2 => const PickPolyhedron(PolyhedronType.octahedron),
@@ -39,7 +40,7 @@ class _ModelPickerState extends State<ModelPicker> {
       4 => const PickPolyhedron(PolyhedronType.dodecahedron),
       _ => null
     };
-    if (event != null){
+    if (event != null) {
       context.read<MainBloc>().add(event);
     }
   }
@@ -99,10 +100,13 @@ class _ModelPickerState extends State<ModelPicker> {
           ],
         ),
         FunctionRadio(
-          value: 5,
-          groupValue: _currentIndex,
-          onRadioUpdate: _updateRadioIndex
-        ),
+            value: 5,
+            groupValue: _currentIndex,
+            onRadioUpdate: _updateRadioIndex),
+        RFigureRadio(
+            value: 6,
+            groupValue: _currentIndex,
+            onRadioUpdate: _updateRadioIndex),
       ],
     );
   }

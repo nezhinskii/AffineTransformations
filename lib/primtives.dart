@@ -79,9 +79,30 @@ class Model implements IPoints {
   }
 
   Model copy() {
-    return Model(
-        List.generate(points.length, (index) => points[index].copy()),
+    return Model(List.generate(points.length, (index) => points[index].copy()),
         _polygonsByIndexes);
+  }
+
+  Model concat(Model other) {
+    List<Point3D> resPoints = [];
+    List<List<int>> resIndexes = [];
+
+    for (var p in points) {
+      resPoints.add(p.copy());
+    }
+    for (var p in other.points) {
+      resPoints.add(p.copy());
+    }
+
+    for (var pol in _polygonsByIndexes) {
+      resIndexes.add(List.from(pol));
+    }
+    int len = points.length;
+    for (var pol in other._polygonsByIndexes) {
+      resIndexes.add(pol.map((e) => e + len).toList());
+    }
+
+    return Model(resPoints, resIndexes);
   }
 
   static Model get cube => Model([

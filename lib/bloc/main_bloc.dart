@@ -15,11 +15,11 @@ part 'main_state.dart';
 class MainBloc extends Bloc<MainEvent, MainState> {
   MainBloc()
       : super(CommonState(
-            model: Model([], []),
-            projection: Matrix.isometric(true, false))) {
+            model: Model([], []), projection: Matrix.isometric(true, false))) {
     on<PickPolyhedron>(_onPickPolyhedron);
     on<PickProjection>(_onPickProjection);
     on<PickFunction>(_onPickFunction);
+    on<PickRFigure>(_onPickRFigure);
     on<RotatePolyhedron>(_onRotatePolyhedron);
     on<TranslatePolyhedron>(_onTranslatePolyhedron);
     on<ScalePolyhedron>(_onScalePolyhedron);
@@ -82,45 +82,75 @@ class MainBloc extends Bloc<MainEvent, MainState> {
       case Planes.yz:
         matrix = Matrix.mirrorYZ();
     }
-    final mirrored = state.model.getTransformed(
-      matrix
-    );
+    final mirrored = state.model.getTransformed(matrix);
     emit(state.copyWith(model: mirrored));
   }
 
-  void _onPickFunction(PickFunction event, Emitter emit){
+  void _onPickFunction(PickFunction event, Emitter emit) {
     final values = event.restrictions.split(' ');
-    if (values.length != 3){
+    if (values.length != 3) {
       emit(state.copyWith(message: 'Неправильно введены ограничения или шаг'));
       return;
     }
     final min = double.tryParse(values[0]),
         max = double.tryParse(values[1]),
         step = double.tryParse(values[2]);
-    if (min == null || max == null || step == null || min > max){
+    if (min == null || max == null || step == null || min > max) {
       emit(state.copyWith(message: 'Неправильно введены ограничения или шаг'));
       return;
     }
     final points = <Point3D>[];
     var length = 0;
-    for(var x = min; x <= max; x += step){
-      length ++;
-      for (var z = min; z <= max; z += step){
+    for (var x = min; x <= max; x += step) {
+      length++;
+      for (var z = min; z <= max; z += step) {
         points.add(Point3D(x, event.func(x, z), z));
       }
     }
     final polygonsByIndexes = <List<int>>[];
-    for (var i = 0; i < length - 1; ++i){
-      for (var j = 0; j < length - 1; ++j){
-        polygonsByIndexes.add([i * length + j, i * (length) + (j + 1), (i + 1) * length + j]);
-        polygonsByIndexes.add([i * (length) + (j + 1), (i + 1) * length + (j + 1), (i + 1) * length + j]);
+    for (var i = 0; i < length - 1; ++i) {
+      for (var j = 0; j < length - 1; ++j) {
+        polygonsByIndexes.add(
+            [i * length + j, i * (length) + (j + 1), (i + 1) * length + j]);
+        polygonsByIndexes.add([
+          i * (length) + (j + 1),
+          (i + 1) * length + (j + 1),
+          (i + 1) * length + j
+        ]);
       }
     }
     final function = Model(points, polygonsByIndexes);
-    emit(
-      state.copyWith(
-        model: function
-      )
-    );
+    emit(state.copyWith(model: function));
+  }
+
+  void _onPickRFigure(PickRFigure event, Emitter emit) {
+    List<Point3D> points = [
+      Point3D(0, 0, 0),
+      Point3D(3, 3, 0),
+      Point3D(1, 6, 0),
+    ]; //event.points;
+
+    int partNum = 10;
+
+    double angle = 360 / partNum;
+
+    Point3D vector = Point3D(0, 1, 0);
+
+    var model = Model(points.map((e) => e / 6).toList(), [
+      [0, 1, 2],
+    ]);
+
+    final scaleRatio =
+        sqrt(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z);
+    var curAngle = angle;
+    var res = model;
+    for (var i = 1; i < partNum; i++) {
+      final rotated = model.getTransformed(
+          Matrix.rotation(radians(curAngle), vector / scaleRatio));
+      res = res.concat(rotated);
+      curAngle += angle;
+    }
+
+    emit(state.copyWith(model: res));
   }
 }
