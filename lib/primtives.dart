@@ -54,9 +54,9 @@ class Model implements IPoints {
   final List<Polygon> polygons;
   @override
   final List<Point3D> points;
-  final List<List<int>> _polygonsByIndexes;
-  Model(this.points, this._polygonsByIndexes) : polygons = [] {
-    for (var polygonIndexes in _polygonsByIndexes) {
+  final List<List<int>> polygonsByIndexes;
+  Model(this.points, this.polygonsByIndexes) : polygons = [] {
+    for (var polygonIndexes in polygonsByIndexes) {
       polygons.add(Polygon(List.generate(
           polygonIndexes.length, (i) => points[polygonIndexes[i]])));
     }
@@ -80,7 +80,7 @@ class Model implements IPoints {
 
   Model copy() {
     return Model(List.generate(points.length, (index) => points[index].copy()),
-        _polygonsByIndexes);
+        polygonsByIndexes);
   }
 
   Model concat(Model other) {
@@ -94,11 +94,11 @@ class Model implements IPoints {
       resPoints.add(p.copy());
     }
 
-    for (var pol in _polygonsByIndexes) {
+    for (var pol in polygonsByIndexes) {
       resIndexes.add(List.from(pol));
     }
     int len = points.length;
-    for (var pol in other._polygonsByIndexes) {
+    for (var pol in other.polygonsByIndexes) {
       resIndexes.add(pol.map((e) => e + len).toList());
     }
 

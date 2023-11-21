@@ -30,14 +30,15 @@ class MainBloc extends Bloc<MainEvent, MainState> {
 
   static const _pixelRatio = 100;
 
-  static Offset point3DToOffset(Point3D point3d, Size size){
-    return Offset(point3d.x / point3d.h * _pixelRatio + size.width / 2, -point3d.y / point3d.h * _pixelRatio + size.height / 2);
+  static Offset point3DToOffset(Point3D point3d, Size size) {
+    return Offset(point3d.x / point3d.h * _pixelRatio + size.width / 2,
+        -point3d.y / point3d.h * _pixelRatio + size.height / 2);
   }
 
-  static Point3D offsetToPoint3D(Offset offset, Size size){
-    return Point3D((offset.dx - size.width/2) / _pixelRatio, -(offset.dy - size.height/2) / _pixelRatio, 0);
+  static Point3D offsetToPoint3D(Offset offset, Size size) {
+    return Point3D((offset.dx - size.width / 2) / _pixelRatio,
+        -(offset.dy - size.height / 2) / _pixelRatio, 0);
   }
-
 
   void _onPickPolyhedron(PickPolyhedron event, Emitter emit) {
     final newPolyhedron = switch (event.polyhedronType) {
@@ -136,10 +137,10 @@ class MainBloc extends Bloc<MainEvent, MainState> {
     emit(state.copyWith(model: function));
   }
 
-  void _onCurvePanEvent(CurvePanEvent event, Emitter emit){
-    if (event.position != null){
+  void _onCurvePanEvent(CurvePanEvent event, Emitter emit) {
+    if (event.position != null) {
       final drawingState = (state as CurveDrawingState);
-      if (drawingState.points.isEmpty){
+      if (drawingState.points.isEmpty) {
         drawingState.path.moveTo(event.position!.dx, event.position!.dy);
       } else {
         drawingState.path.lineTo(event.position!.dx, event.position!.dy);
@@ -147,26 +148,20 @@ class MainBloc extends Bloc<MainEvent, MainState> {
       drawingState.points.add(event.position!);
       emit(drawingState.copyWith());
     } else {
-      if (state is CommonState){
-        emit(
-          CurveDrawingState(
+      if (state is CommonState) {
+        emit(CurveDrawingState(
             model: state.model,
             projection: state.projection,
             path: Path(),
-            points: []
-          )
-        );
+            points: []));
       } else {
         final drawingState = (state as CurveDrawingState);
-        emit(
-          CurveReadyState(
+        emit(CurveReadyState(
             model: drawingState.model,
-            points: drawingState.points.map(
-              (point) => offsetToPoint3D(point, event.size!)
-            ).toList(),
-            projection: drawingState.projection
-          )
-        );
+            points: drawingState.points
+                .map((point) => offsetToPoint3D(point, event.size!))
+                .toList(),
+            projection: drawingState.projection));
       }
     }
   }
@@ -175,54 +170,69 @@ class MainBloc extends Bloc<MainEvent, MainState> {
     List<String> vectorStr = event.vectorStr.split(' ');
     int divisionsNumber;
     Point3D rotationAxis;
-    if (vectorStr.length != 3){
-      emit(
-        CommonState(
+    if (vectorStr.length != 3) {
+      emit(CommonState(
           model: state.model,
           projection: state.projection,
-          message: 'Неверное количество точек'
-        )
-      );
+          message: 'Неверное количество точек'));
     }
-    try{
-      rotationAxis = Point3D(double.parse(vectorStr[0]), double.parse(vectorStr[1]), double.parse(vectorStr[2]));
+    try {
+      rotationAxis = Point3D(double.parse(vectorStr[0]),
+          double.parse(vectorStr[1]), double.parse(vectorStr[2]));
       divisionsNumber = int.parse(event.divisionsStr);
-    } catch (_){
-      emit(
-        CommonState(
+    } catch (_) {
+      emit(CommonState(
           model: state.model,
           projection: state.projection,
-          message: ';?:№%!*;№%:?!:(*?;!)(*№;()!№'
-        )
-      );
+          message: ';?:№%!*;№%:?!:(*?;!)(*№;()!№'));
       return;
     }
 
     final selectedPoints = <Point3D>[];
-    for (int i = 0; i < event.points.length; i+=30){
+    for (int i = 0; i < event.points.length; i += 30) {
       selectedPoints.add(event.points[i]);
     }
     List<Point3D> points = selectedPoints;
 
     double angle = 360 / divisionsNumber;
 
-
-
     var model = Model(points, [
       List.generate(points.length, (index) => index),
     ]);
 
-    final scaleRatio =
-        sqrt(rotationAxis.x * rotationAxis.x + rotationAxis.y * rotationAxis.y + rotationAxis.z * rotationAxis.z);
+    final scaleRatio = sqrt(rotationAxis.x * rotationAxis.x +
+        rotationAxis.y * rotationAxis.y +
+        rotationAxis.z * rotationAxis.z);
+
     var curAngle = angle;
-    var res = model;
+
+    List<Point3D> finalPoints = [];
+    List<List<int>> finalIndices = [];
+
+    finalPoints.addAll(model.points.map((e) => e.copy()));
+
     for (var i = 1; i < divisionsNumber; i++) {
       final rotated = model.getTransformed(
           Matrix.rotation(radians(curAngle), rotationAxis / scaleRatio));
-      res = res.concat(rotated);
+      finalPoints.addAll(rotated.points.map((e) => e.copy()));
       curAngle += angle;
     }
-
-    emit(CommonState(model: res, projection: state.projection));
+    int len = model.points.length;
+    for (var i = 1; i < divisionsNumber + 1; i++) {
+      for (var j = 0; j < len - 1; j++) {
+        finalIndices.add([
+          len * ((i - 1) % divisionsNumber) + j,
+          len * ((i - 1) % divisionsNumber) + 1 + j,
+          len * (i % divisionsNumber) + j
+        ]);
+        finalIndices.add([
+          len * ((i - 1) % divisionsNumber) + 1 + j,
+          len * (i % divisionsNumber) + j,
+          len * (i % divisionsNumber) + 1 + j
+        ]);
+      }
+    }
+    emit(CommonState(
+        model: Model(finalPoints, finalIndices), projection: state.projection));
   }
 }
