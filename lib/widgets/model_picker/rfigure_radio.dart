@@ -1,5 +1,3 @@
-import 'dart:ffi';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -21,52 +19,56 @@ class RFigureRadio extends StatefulWidget {
 }
 
 class _RFigureRadioState extends State<RFigureRadio> {
-  double _pulse(double x, double z) {
-    var r = x * x + z * z + 1;
-    return 5 * (cos(r) / r + 0.1);
-  }
-
-  double _sqr(double x, double z) {
-    return x * x + z * z - 2;
-  }
-
-  double _trigonometry(double x, double z) {
-    return sin(x) * cos(z);
-  }
-
-  late double Function(double, double) _selectedFunction = _pulse;
-  final _tController = TextEditingController(text: '-2 2 1e-1');
+  final _vectorController = TextEditingController(text: '0 1 0');
+  final _divisionsController = TextEditingController(text: '50');
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            Radio(
-              value: widget.value,
-              groupValue: widget.groupValue,
-              onChanged: (value) {
-                if (widget.value == value) {
-                  context.read<MainBloc>().add(PickRFigure([]));
-                }
-                widget.onRadioUpdate(value);
-              },
-            ),
-            const Text("Фигура вращения"),
-          ],
-        ),
-        ElevatedButton(onPressed: () {}, child: const Text("Применить")),
-        SizedBox(
-          height: 65,
-          width: 220,
-          child: TextField(
-            controller: _tController,
-            decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero, label: Text('Min Max Step')),
+    return BlocListener<MainBloc, MainState>(
+      listener: (context, state) {
+        if (state is CurveReadyState){
+          context.read<MainBloc>().add(PickRFigure(state.points, _vectorController.text, _divisionsController.text));
+        }
+      },
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Radio(
+                value: widget.value,
+                groupValue: widget.groupValue,
+                onChanged: (value) {
+                  if (widget.value == value) {
+                    context.read<MainBloc>().add(const CurvePanEvent(null));
+                  }
+                  widget.onRadioUpdate(value);
+                },
+              ),
+              const Text("Фигура вращения"),
+            ],
           ),
-        )
-      ],
+          // ElevatedButton(onPressed: () {}, child: const Text("Применить")),
+          SizedBox(
+            height: 65,
+            width: 220,
+            child: TextField(
+              controller: _vectorController,
+              decoration: const InputDecoration(
+                  contentPadding: EdgeInsets.zero, label: Text('Ось вращения')),
+            ),
+          ),
+          SizedBox(
+            height: 65,
+            width: 220,
+            child: TextField(
+              controller: _divisionsController,
+              decoration: const InputDecoration(
+                  contentPadding: EdgeInsets.zero,
+                  label: Text('Количество разбиений')),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -23,7 +23,8 @@ class PickFunction extends MainEvent {
 
 class PickRFigure extends MainEvent {
   final List<Point3D> points;
-  const PickRFigure(this.points);
+  final String vectorStr, divisionsStr;
+  const PickRFigure(this.points, this.vectorStr, this.divisionsStr);
 }
 
 class RotatePolyhedron extends MainEvent {
@@ -45,4 +46,10 @@ class ScalePolyhedron extends MainEvent {
 class MirrorPolyhedron extends MainEvent {
   final Planes plane;
   const MirrorPolyhedron(this.plane);
+}
+
+class CurvePanEvent extends MainEvent{
+  final Offset? position;
+  final Size? size;
+  const CurvePanEvent(this.position, [this.size]);
 }

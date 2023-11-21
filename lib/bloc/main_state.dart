@@ -43,20 +43,48 @@ class CurveDrawingState extends MainState {
     required super.projection,
     super.message,
     required this.path,
+    required this.points
   });
 
   final Path path;
+  final List<Offset> points;
 
   @override
   CurveDrawingState copyWith({
     Model? model,
     Matrix? projection,
     String? message,
-    Path? path
+    Path? path,
+    List<Offset>? points
   }) => CurveDrawingState(
       model: model ?? this.model,
       projection: projection ?? this.projection,
       message: message,
-      path: path ?? this.path
+      path: path ?? this.path,
+      points: points ?? this.points
+  );
+}
+
+class CurveReadyState extends MainState{
+  const CurveReadyState({
+    required super.model,
+    required super.projection,
+    super.message,
+    required this.points
+  });
+
+  final List<Point3D> points;
+
+  @override
+  CurveReadyState copyWith({
+    Model? model,
+    Matrix? projection,
+    String? message,
+    List<Point3D>? points
+  }) => CurveReadyState(
+      model: model ?? this.model,
+      projection: projection ?? this.projection,
+      message: message,
+      points: points ?? this.points
   );
 }

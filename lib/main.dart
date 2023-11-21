@@ -1,10 +1,10 @@
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:graphics_lab6/painters/app_painter.dart';
 import 'package:graphics_lab6/bloc/main_bloc.dart';
 import 'package:graphics_lab6/disco_model.dart';
+import 'package:graphics_lab6/painters/curve_painter.dart';
 import 'package:graphics_lab6/widgets/toolbar.dart';
 
 void main() {
@@ -78,20 +78,40 @@ class _MainPageState extends State<MainPage> {
                   Expanded(
                     child: Stack(
                       children: [
-                        ClipRRect(
-                          child: CustomPaint(
-                            foregroundPainter: AppPainter(
-                              projection: state.projection,
-                              polyhedron: state.model,
-                              secretFeature: context.read<DiscoModel>().isEnabled
-                            ),
-                            child: Container(
-                              color: context.watch<DiscoModel>().isEnabled ?
-                                context.watch<DiscoModel>().color : Colors.white,
-                              width: double.infinity,
-                              height: double.infinity,
-                            ),
-                          ),
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            return GestureDetector(
+                              onPanDown: (details) {
+                                context.read<MainBloc>().add(CurvePanEvent(details.localPosition));
+                              },
+                              onPanEnd: (details) {
+                                context.read<MainBloc>().add(CurvePanEvent(null, Size(constraints.maxWidth, constraints.maxHeight)));
+                              },
+                              onPanUpdate: (details) {
+                                context.read<MainBloc>().add(CurvePanEvent(details.localPosition));
+                              },
+                              child: ClipRRect(
+                                child: CustomPaint(
+                                  foregroundPainter: switch(state){
+                                    CurveDrawingState() => CurvePainter(
+                                      path: state.path
+                                    ),
+                                    _ => AppPainter(
+                                        projection: state.projection,
+                                        polyhedron: state.model,
+                                        secretFeature: context.read<DiscoModel>().isEnabled
+                                    ),
+                                  },
+                                  child: Container(
+                                    color: context.watch<DiscoModel>().isEnabled ?
+                                    context.watch<DiscoModel>().color : Colors.white,
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                  ),
+                                ),
+                              ),
+                            );
+                          }
                         ),
                         Align(
                           alignment: Alignment.bottomRight,
