@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:graphics_lab6/bloc/main_bloc.dart';
 import 'package:graphics_lab6/widgets/hiding_panel.dart';
 import 'package:graphics_lab6/widgets/model_picker/model_picker.dart';
 import 'package:graphics_lab6/widgets/projcetion_picker/projection_picker.dart';
@@ -13,36 +15,43 @@ class ToolBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SingleChildScrollView(
-      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
-      child: Column(
-        children: [
-          HidingPanel(
-            title: Text("Тип проекции"),
-            child: ProjectionPicker()
-          ),
-          HidingPanel(
-            title: Text("Модель"),
-            child: ModelPicker()
-          ),
-          HidingPanel(
-            title: Text("Вращение"),
-            child: RotationPicker()
-          ),
-          HidingPanel(
+    return SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+        child: Column(
+          children: [
+            const HidingPanel(title: Text("Тип проекции"), child: ProjectionPicker()),
+            const HidingPanel(title: Text("Модель"), child: ModelPicker()),
+            const HidingPanel(title: Text("Вращение"), child: RotationPicker()),
+            const HidingPanel(
               title: Text("Перемещение"),
               child: TranslationPicker(),
-          ),
-          HidingPanel(
+            ),
+            const HidingPanel(
               title: Text("Масштабирование"),
               child: ScalingPicker(),
-          ),
-          HidingPanel(
-            title: Text("Отражение"),
-            child: MirroringPicker(),
-          ),
-        ],
-      )
-    );
+            ),
+            const HidingPanel(
+              title: Text("Отражение"),
+              child: MirroringPicker(),
+            ),
+            OutlinedButton(
+              onPressed: () {
+                BlocProvider.of<MainBloc>(context).add(const SaveObjEvent());
+              },
+              child: const Text(
+                "Сохранить",
+              ),
+            ),
+            const SizedBox(height: 15,),
+            OutlinedButton(
+              onPressed: () {
+                BlocProvider.of<MainBloc>(context).add(const LoadObjEvent());
+              },
+              child: const Text(
+                "Загрузить",
+              ),
+            ),
+          ],
+        ));
   }
 }

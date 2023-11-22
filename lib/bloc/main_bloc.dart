@@ -26,6 +26,31 @@ class MainBloc extends Bloc<MainEvent, MainState> {
     on<ScalePolyhedron>(_onScalePolyhedron);
     on<MirrorPolyhedron>(_onMirrorPolyhedron);
     on<CurvePanEvent>(_onCurvePanEvent);
+    on<SaveObjEvent>((event, emit) async {
+      final res = await state.model.saveFile();
+      final message = res ? "Файл сохранён" : "Файл не сохранён";
+      emit(state.copyWith(message: message));
+    });
+    on<LoadObjEvent>((event, emit) async {
+      final newModel = await Model.fromFile();
+      // int len = state.model.points.length;
+      // for (int i = 0; i < len; i++) {
+      //   if (newModel!.points[i].x != state.model.points[i].x) {
+      //     print(i);
+      //   }
+      // }
+      if (newModel != null) {
+        emit(
+          CommonState(
+            model: newModel,
+            projection: state.projection,
+            message: state.message,
+          ),
+        );
+      } else {
+        emit(state.copyWith(message: "Файл не загружен"));
+      }
+    });
   }
 
   static const _pixelRatio = 100;

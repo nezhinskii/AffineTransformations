@@ -1,4 +1,8 @@
+import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
+
+import 'package:file_picker/file_picker.dart';
 
 import 'matrix.dart';
 
@@ -9,8 +13,11 @@ abstract interface class IPoints {
 class Point3D {
   double x, y, z;
   double h;
+
   Point3D(this.x, this.y, this.z, [this.h = 1]);
+
   Point3D.zero() : this(0, 0, 0);
+
   updateWithVector(Matrix matrix) {
     x = matrix[0][0];
     y = matrix[0][1];
@@ -39,7 +46,9 @@ class Point3D {
 
 class Edge implements IPoints {
   final Point3D start, end;
+
   Edge(this.start, this.end);
+
   @override
   List<Point3D> get points => [start, end];
 }
@@ -47,6 +56,7 @@ class Edge implements IPoints {
 class Polygon implements IPoints {
   @override
   final List<Point3D> points;
+
   Polygon(this.points);
 }
 
@@ -55,6 +65,7 @@ class Model implements IPoints {
   @override
   final List<Point3D> points;
   final List<List<int>> polygonsByIndexes;
+
   Model(this.points, this.polygonsByIndexes) : polygons = [] {
     for (var polygonIndexes in polygonsByIndexes) {
       polygons.add(Polygon(List.generate(
@@ -232,5 +243,87 @@ class Model implements IPoints {
           [18, 19, 6, 13, 4],
           [18, 19, 7, 15, 5],
         ]);
+  }
+
+  Future<bool> saveFile() async {
+    var path = await FilePicker.platform.saveFile(
+      type: FileType.custom,
+      allowedExtensions: ['obj'],
+    );
+    if (path == null) {
+      return false;
+    }
+    final buffer = StringBuffer();
+    for (var point in points) {
+      buffer.write("v ${point.x.toStringAsFixed(9)} ${point.y.toStringAsFixed(9)} ${point.z.toStringAsFixed(9)}\n");
+    }
+    buffer.writeln();
+    for (var polygonIndexes in polygonsByIndexes) {
+      buffer.write("f ");
+      for (var index in polygonIndexes) {
+        buffer.write("${index + 1} ");
+      }
+      buffer.write("\n");
+    }
+    if (!path.endsWith(".obj")) {
+      path = "$path.obj";
+    }
+    await File(path).writeAsString(buffer.toString());
+    return true;
+  }
+
+  static final _doubleRE = RegExp(r"\-?[0-9]+(\.[0-9]+)?");
+
+  static final RegExp _objVertexRE = RegExp(
+    "v (?<x>${_doubleRE.pattern}) (?<y>${_doubleRE.pattern}) (?<z>${_doubleRE.pattern})( ${_doubleRE.pattern})?\\D",
+  );
+
+  static final _intSlashRE = RegExp(r"([0-9]+)(/[0-9]*)?(/[0-9]+)?");
+
+  static final RegExp _objFaceRE = RegExp(
+    "f (${_intSlashRE.pattern} )*(${_intSlashRE.pattern})\\D",
+  );
+
+  static Future<Model?> fromFile() async {
+    final pick = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['obj'],
+      withData: true,
+    );
+
+    if (pick == null || !pick.isSinglePick) {
+      return null;
+    }
+
+    String fileContent = utf8.decode(pick.files.first.bytes!);
+    final points = List<Point3D>.empty(growable: true);
+    final polygonsByIndexes = List<List<int>>.empty(growable: true);
+
+    print("points ${_objVertexRE.allMatches(fileContent).length}");
+    for (RegExpMatch match in _objVertexRE.allMatches(fileContent)) {
+      points.add(
+        Point3D(
+          double.parse(match.namedGroup("x")!),
+          double.parse(match.namedGroup("y")!),
+          double.parse(match.namedGroup("z")!),
+        ),
+      );
+
+      print("point ${match.namedGroup("x")!} ${match.namedGroup("y")!} ${match.namedGroup("z")!}");
+    }
+
+    print("faces ${_objFaceRE.allMatches(fileContent).length}");
+    for (RegExpMatch match in _objFaceRE.allMatches(fileContent)) {
+      var polygon = List<int>.empty(growable: true);
+      print(match.group(0)!);
+      for (RegExpMatch m in _intSlashRE.allMatches(match.group(0)!)) {
+        polygon.add(int.parse(m.group(1)!)-1);
+      }
+      polygonsByIndexes.add(polygon);
+      print("polygon $polygon");
+    }
+
+    //return points;
+    return Model(points,polygonsByIndexes);
   }
 }

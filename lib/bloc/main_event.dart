@@ -53,3 +53,11 @@ class CurvePanEvent extends MainEvent{
   final Size? size;
   const CurvePanEvent(this.position, [this.size]);
 }
+
+class SaveObjEvent extends MainEvent{
+  const SaveObjEvent();
+}
+
+class LoadObjEvent extends MainEvent{
+  const LoadObjEvent();
+}
