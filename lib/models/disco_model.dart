@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 class DiscoModel{
   bool _isEnabled;
   late Timer _colorTimer;
-  final AudioPlayer _audioPlayer = AudioPlayer();//..setSourceAsset("audio/disco.mp3")..setReleaseMode(ReleaseMode.loop);
+  final AudioPlayer _audioPlayer = AudioPlayer()..setSourceAsset("audio/disco.mp3")..setReleaseMode(ReleaseMode.loop);
   Color color = Color((Random().nextDouble() * 0xFFFFFF).toInt()).withOpacity(0.6);
   DiscoModel() : _isEnabled = false;
   bool get isEnabled => _isEnabled;

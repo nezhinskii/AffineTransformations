@@ -1,9 +1,10 @@
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:graphics_lab6/painters/app_painter.dart';
 import 'package:graphics_lab6/bloc/main_bloc.dart';
-import 'package:graphics_lab6/disco_model.dart';
+import 'package:graphics_lab6/models/disco_model.dart';
 import 'package:graphics_lab6/painters/curve_painter.dart';
 import 'package:graphics_lab6/widgets/toolbar.dart';
 
@@ -31,6 +32,8 @@ class MyApp extends StatelessWidget {
   }
 }
 
+final canvasAreaKey = GlobalKey();
+
 class MainPage extends StatefulWidget {
   const MainPage({Key? key}) : super(key: key);
 
@@ -40,6 +43,7 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   final _discoModel = DiscoModel();
+  Offset? _previousPosition;
 
   @override
   void dispose() async {
@@ -80,33 +84,48 @@ class _MainPageState extends State<MainPage> {
                       children: [
                         LayoutBuilder(
                           builder: (context, constraints) {
-                            return GestureDetector(
-                              onPanDown: (details) {
-                                context.read<MainBloc>().add(CurvePanEvent(details.localPosition));
+                            return Listener(
+                              onPointerSignal: (pointerSignal) {
+                                if (pointerSignal is PointerScrollEvent) {
+                                  context.read<MainBloc>().add(CameraScaleEvent(pointerSignal.scrollDelta.dy));
+                                }
                               },
-                              onPanEnd: (details) {
-                                context.read<MainBloc>().add(CurvePanEvent(null, Size(constraints.maxWidth, constraints.maxHeight)));
-                              },
-                              onPanUpdate: (details) {
-                                context.read<MainBloc>().add(CurvePanEvent(details.localPosition));
-                              },
-                              child: ClipRRect(
-                                child: CustomPaint(
-                                  foregroundPainter: switch(state){
-                                    CurveDrawingState() => CurvePainter(
-                                      path: state.path
+                              child: GestureDetector(
+                                onPanDown: state is CurveDrawingState ? (details) {
+                                  context.read<MainBloc>().add(CurvePanEvent(details.localPosition));
+                                } :(details) {
+                                  _previousPosition = details.localPosition;
+                                },
+                                onPanEnd: state is CurveDrawingState ? (details) {
+                                  context.read<MainBloc>().add(CurvePanEvent(null, Size(constraints.maxWidth, constraints.maxHeight)));
+                                }:(details) {
+                                  _previousPosition = null;
+                                },
+                                onPanUpdate: state is CurveDrawingState ? (details) {
+                                  context.read<MainBloc>().add(CurvePanEvent(details.localPosition));
+                                }:(details) {
+                                  context.read<MainBloc>().add(CameraRotationEvent(details.localPosition - _previousPosition!));
+                                  _previousPosition = details.localPosition;
+                                },
+                                child: ClipRRect(
+                                  key: canvasAreaKey,
+                                  child: CustomPaint(
+                                    foregroundPainter: switch(state){
+                                      CurveDrawingState() => CurvePainter(
+                                        path: state.path
+                                      ),
+                                      _ => AppPainter(
+                                          camera: state.camera,
+                                          polyhedron: state.model,
+                                          secretFeature: context.read<DiscoModel>().isEnabled
+                                      ),
+                                    },
+                                    child: Container(
+                                      color: context.watch<DiscoModel>().isEnabled ?
+                                      context.watch<DiscoModel>().color : Colors.white,
+                                      width: double.infinity,
+                                      height: double.infinity,
                                     ),
-                                    _ => AppPainter(
-                                        projection: state.projection,
-                                        polyhedron: state.model,
-                                        secretFeature: context.read<DiscoModel>().isEnabled
-                                    ),
-                                  },
-                                  child: Container(
-                                    color: context.watch<DiscoModel>().isEnabled ?
-                                    context.watch<DiscoModel>().color : Colors.white,
-                                    width: double.infinity,
-                                    height: double.infinity,
                                   ),
                                 ),
                               ),

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:graphics_lab6/bloc/main_bloc.dart';
-import 'package:graphics_lab6/matrix.dart';
-import 'package:graphics_lab6/projection_type.dart';
+import 'package:graphics_lab6/models/matrix.dart';
+import 'package:graphics_lab6/models/projection_type.dart';
 import 'package:graphics_lab6/widgets/snack_bar.dart';
 import 'package:vector_math/vector_math.dart';
 
@@ -28,7 +28,7 @@ class _ProjectionPickerState extends State<ProjectionPicker> {
   @override
   void initState() {
     super.initState();
-    context.read<MainBloc>().add(PickProjection(Matrix.isometric(true, false)));
+    // context.read<MainBloc>().add(UpdateCamera(Matrix.isometric(true, false)));
   }
 
   void _updateType(ProjectionType? projectionType){
@@ -153,7 +153,7 @@ class _ProjectionPickerState extends State<ProjectionPicker> {
               ProjectionType.perspective3 => _perspective3Matrix,
             };
             if (pickedProjectionMatrix != null){
-              context.read<MainBloc>().add(PickProjection(pickedProjectionMatrix));
+              // context.read<MainBloc>().add(UpdateCamera(pickedProjectionMatrix));
             } else{
               showAppSnackBar(context, "Одно или несколько полей заполнены неверно");
             }

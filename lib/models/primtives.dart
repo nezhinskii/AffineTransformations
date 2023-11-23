@@ -3,8 +3,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:file_picker/file_picker.dart';
-
-import 'matrix.dart';
+import 'package:graphics_lab6/models/matrix.dart';
 
 abstract interface class IPoints {
   List<Point3D> get points;
@@ -27,6 +26,27 @@ class Point3D {
 
   Point3D copy() => Point3D(x, y, z);
 
+  Point3D normalized() {
+    double len = length();
+    return Point3D(x/len, y/len, z/len);
+  }
+
+  Point3D cross(Point3D other) {
+    return Point3D(
+      y * other.z - z * other.y,
+      z * other.x - x * other.z,
+      x * other.y - y * other.x,
+    );
+  }
+
+  double dot(Point3D other) {
+    return x * other.x + y * other.y + z * other.z;
+  }
+
+  Point3D operator *(double value){
+    return Point3D(x * value, y * value, z * value);
+  }
+
   Point3D operator -(Point3D other) {
     return Point3D(x - other.x, y - other.y, z - other.z, h);
   }
@@ -41,6 +61,10 @@ class Point3D {
 
   Point3D operator /(num d) {
     return Point3D(x / d, y / d, z / d);
+  }
+
+  double length(){
+    return sqrt(x * x + y * y + z * z);
   }
 }
 
@@ -299,7 +323,7 @@ class Model implements IPoints {
     final points = List<Point3D>.empty(growable: true);
     final polygonsByIndexes = List<List<int>>.empty(growable: true);
 
-    print("points ${_objVertexRE.allMatches(fileContent).length}");
+    // print("points ${_objVertexRE.allMatches(fileContent).length}");
     for (RegExpMatch match in _objVertexRE.allMatches(fileContent)) {
       points.add(
         Point3D(
@@ -309,18 +333,18 @@ class Model implements IPoints {
         ),
       );
 
-      print("point ${match.namedGroup("x")!} ${match.namedGroup("y")!} ${match.namedGroup("z")!}");
+      // print("point ${match.namedGroup("x")!} ${match.namedGroup("y")!} ${match.namedGroup("z")!}");
     }
 
-    print("faces ${_objFaceRE.allMatches(fileContent).length}");
+    // print("faces ${_objFaceRE.allMatches(fileContent).length}");
     for (RegExpMatch match in _objFaceRE.allMatches(fileContent)) {
       var polygon = List<int>.empty(growable: true);
-      print(match.group(0)!);
+      // print(match.group(0)!);
       for (RegExpMatch m in _intSlashRE.allMatches(match.group(0)!)) {
         polygon.add(int.parse(m.group(1)!)-1);
       }
       polygonsByIndexes.add(polygon);
-      print("polygon $polygon");
+      // print("polygon $polygon");
     }
 
     //return points;

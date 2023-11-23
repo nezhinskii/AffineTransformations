@@ -2,9 +2,10 @@ import 'dart:math';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:graphics_lab6/matrix.dart';
-import 'package:graphics_lab6/polyhedron_type.dart';
-import 'package:graphics_lab6/primtives.dart';
+import 'package:graphics_lab6/models/camera.dart';
+import 'package:graphics_lab6/models/matrix.dart';
+import 'package:graphics_lab6/models/polyhedron_type.dart';
+import 'package:graphics_lab6/models/primtives.dart';
 import 'package:graphics_lab6/widgets/mirroring_picker.dart';
 import 'package:meta/meta.dart';
 import 'package:vector_math/vector_math.dart';
@@ -14,11 +15,22 @@ part 'main_event.dart';
 part 'main_state.dart';
 
 class MainBloc extends Bloc<MainEvent, MainState> {
-  MainBloc()
-      : super(CommonState(
-            model: Model([], []), projection: Matrix.isometric(true, false))) {
+  MainBloc() : super(CommonState(
+      model: Model([], []),
+      camera: Camera(
+        eye: Point3D(5, 5, 5),
+        target: Point3D(0, 0, 0),
+        up: Point3D(0, 1, 0),
+      )
+    )
+  ) {
+    on<ShowMessageEvent>((event, emit){
+      emit(state.copyWith(message: event.message));
+    });
     on<PickPolyhedron>(_onPickPolyhedron);
-    on<PickProjection>(_onPickProjection);
+    on<UpdateCamera>(_onUpdateCamera);
+    on<CameraRotationEvent>(_onCameraRotation);
+    on<CameraScaleEvent>(_onCameraScale);
     on<PickFunction>(_onPickFunction);
     on<PickRFigure>(_onPickRFigure);
     on<RotatePolyhedron>(_onRotatePolyhedron);
@@ -43,7 +55,7 @@ class MainBloc extends Bloc<MainEvent, MainState> {
         emit(
           CommonState(
             model: newModel,
-            projection: state.projection,
+            camera: state.camera,
             message: state.message,
           ),
         );
@@ -76,8 +88,8 @@ class MainBloc extends Bloc<MainEvent, MainState> {
     emit(state.copyWith(model: newPolyhedron));
   }
 
-  void _onPickProjection(PickProjection event, Emitter emit) {
-    emit(state.copyWith(projection: event.matrix));
+  void _onUpdateCamera(UpdateCamera event, Emitter emit) {
+    emit(state.copyWith(camera: event.camera));
   }
 
   void _onRotatePolyhedron(RotatePolyhedron event, Emitter emit) {
@@ -176,7 +188,7 @@ class MainBloc extends Bloc<MainEvent, MainState> {
       if (state is CommonState) {
         emit(CurveDrawingState(
             model: state.model,
-            projection: state.projection,
+            camera: state.camera,
             path: Path(),
             points: []));
       } else {
@@ -186,7 +198,7 @@ class MainBloc extends Bloc<MainEvent, MainState> {
             points: drawingState.points
                 .map((point) => offsetToPoint3D(point, event.size!))
                 .toList(),
-            projection: drawingState.projection));
+            camera: drawingState.camera));
       }
     }
   }
@@ -198,7 +210,7 @@ class MainBloc extends Bloc<MainEvent, MainState> {
     if (vectorStr.length != 3) {
       emit(CommonState(
           model: state.model,
-          projection: state.projection,
+          camera: state.camera,
           message: 'Неверное количество точек'));
     }
     try {
@@ -208,7 +220,7 @@ class MainBloc extends Bloc<MainEvent, MainState> {
     } catch (_) {
       emit(CommonState(
           model: state.model,
-          projection: state.projection,
+          camera: state.camera,
           message: ';?:№%!*;№%:?!:(*?;!)(*№;()!№'));
       return;
     }
@@ -258,6 +270,36 @@ class MainBloc extends Bloc<MainEvent, MainState> {
       }
     }
     emit(CommonState(
-        model: Model(finalPoints, finalIndices), projection: state.projection));
+        model: Model(finalPoints, finalIndices), camera: state.camera));
+  }
+
+  static const double sensitivity = 0.003;
+  void _onCameraRotation(CameraRotationEvent event, Emitter emit){
+    final camera = state.camera;
+    Point3D direction = camera.target - camera.eye;
+    double radius = direction.length();
+
+    double theta = atan2(direction.z, direction.x);
+    double phi = acos(direction.y / radius);
+
+    theta += event.delta.dx * sensitivity;
+    phi += event.delta.dy * sensitivity;
+    phi = max(0.1, min(pi - 0.1, phi));
+    direction.x = radius * sin(phi) * cos(theta);
+    direction.y = radius * cos(phi);
+    direction.z = radius * sin(phi) * sin(theta);
+
+    final eye = camera.target - direction;
+    emit(state.copyWith(camera: camera.copyWith(eye: eye)));
+  }
+
+  void _onCameraScale(CameraScaleEvent event, Emitter emit){
+    final camera = state.camera;
+    Point3D direction = camera.target - camera.eye;
+    double distance = direction.length();
+    distance += event.delta * sensitivity;
+
+    final eye = camera.target - direction.normalized() * distance;
+    emit(state.copyWith(camera: camera.copyWith(eye: eye)));
   }
 }

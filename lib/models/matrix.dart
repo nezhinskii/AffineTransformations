@@ -1,9 +1,55 @@
 import 'dart:math';
-
-import 'package:graphics_lab6/primtives.dart';
+import 'package:vector_math/vector_math.dart';
+import 'package:graphics_lab6/models/primtives.dart';
 
 class Matrix {
   Matrix(int rows, int cols, this.value);
+
+  Matrix.unit():this(4, 4,[
+    [1, 0, 0, 0],
+    [0, 1, 0, 0],
+    [0, 0, 1, 0],
+    [0, 0, 0, 1]
+  ]);
+
+  Matrix.view(Point3D eye, Point3D target, Point3D up) : value = []{
+    Point3D forward = (eye - target).normalized();
+    Point3D right = (up.cross(forward)).normalized();
+    Point3D u = forward.cross(right);
+    value.addAll([
+      [right.x, u.x, forward.x, 0],
+      [right.y, u.y, forward.y, 0],
+      [right.z, u.z, forward.z, 0],
+      [-right.dot(eye), -u.dot(eye), -forward.dot(eye), 1]
+    ]);
+  }
+
+  Matrix.cameraPerspective(double fov, double aspect, double near, double far) : value = []{
+    double f = 1.0 / tan(radians(fov) / 2.0);
+    value.addAll([
+      [f / aspect, 0, 0, 0],
+      [0, f, 0, 0],
+      [0, 0, (far + near) / (near - far), -1],
+      [0, 0, (2 * far * near) /(near - far), 0]
+    ]);
+  }
+
+  Matrix.cameraOrthographic(double near, double far) : value = []{
+    double height = 2;
+    double width = 2;
+
+    double left = -width / 2;
+    double right = width / 2;
+    double bottom = -height / 2;
+    double top = height / 2;
+
+    value.addAll([
+      [2 / width, 0, 0, 0],
+      [0, 2 / height, 0, 0],
+      [0, 0, -2 / (far - near), 0],
+      [-(right + left) / (right - left), -(top + bottom) / (top - bottom), -(far + near) / (far - near), 1]
+    ]);
+  }
 
   Matrix.point(Point3D point) : this(1, 4, [[point.x, point.y, point.z, 1]]);
 

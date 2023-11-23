@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:graphics_lab6/bloc/main_bloc.dart';
+import 'package:graphics_lab6/widgets/camera_picker.dart';
 import 'package:graphics_lab6/widgets/hiding_panel.dart';
 import 'package:graphics_lab6/widgets/model_picker/model_picker.dart';
 import 'package:graphics_lab6/widgets/projcetion_picker/projection_picker.dart';
@@ -19,7 +20,7 @@ class ToolBar extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
         child: Column(
           children: [
-            const HidingPanel(title: Text("Тип проекции"), child: ProjectionPicker()),
+            const HidingPanel(title: Text("Настройки камеры"), child: CameraPicker()),
             const HidingPanel(title: Text("Модель"), child: ModelPicker()),
             const HidingPanel(title: Text("Вращение"), child: RotationPicker()),
             const HidingPanel(

@@ -3,8 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:graphics_lab6/bloc/main_bloc.dart';
-import 'package:graphics_lab6/disco_model.dart';
-import 'package:graphics_lab6/primtives.dart';
+import 'package:graphics_lab6/models/primtives.dart';
 import 'package:graphics_lab6/widgets/snack_bar.dart';
 
 class TranslationPicker extends StatefulWidget {

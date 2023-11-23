@@ -3,13 +3,14 @@ import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:graphics_lab6/bloc/main_bloc.dart';
-import 'package:graphics_lab6/matrix.dart';
-import 'package:graphics_lab6/primtives.dart';
+import 'package:graphics_lab6/models/camera.dart';
+import 'package:graphics_lab6/models/matrix.dart';
+import 'package:graphics_lab6/models/primtives.dart';
 import 'package:vector_math/vector_math.dart' as vm;
 
 class AppPainter extends CustomPainter{
   final Model polyhedron;
-  final Matrix projection;
+  final Camera camera;
   final bool secretFeature;
 
   static final _axisPaint = Paint()..strokeWidth = 1..color = Colors.deepPurple;
@@ -45,7 +46,7 @@ class AppPainter extends CustomPainter{
 
   const AppPainter({
     required this.polyhedron,
-    required this.projection,
+    required this.camera,
     required this.secretFeature,
   });
 
@@ -64,11 +65,11 @@ class AppPainter extends CustomPainter{
         if (secretFeature) {
           point.updateWithVector(Matrix.point(point) * m);
         }
-        point.updateWithVector(Matrix.point(point) * projection);
+        point.updateWithVector(Matrix.point(point) * camera.view);
+        point.updateWithVector(Matrix.point(point) * camera.projection);
       }
     }
-    final projectedPolyhedron = polyhedron.getTransformed(projection);
-
+    final projectedPolyhedron = polyhedron.getTransformed(camera.view).getTransformed(camera.projection);
     canvas.drawLine(MainBloc.point3DToOffset(xAxis.start, size), MainBloc.point3DToOffset(xAxis.end, size), _axisPaint);
     _xLabel.paint(canvas, MainBloc.point3DToOffset(xAxis.end, size));
     canvas.drawLine(MainBloc.point3DToOffset(yAxis.start, size), MainBloc.point3DToOffset(yAxis.end, size), _axisPaint);

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:graphics_lab6/bloc/main_bloc.dart';
-import 'package:graphics_lab6/polyhedron_type.dart';
+import 'package:graphics_lab6/models/polyhedron_type.dart';
 import 'package:graphics_lab6/widgets/model_picker/function_radio.dart';
 import 'package:graphics_lab6/widgets/model_picker/rfigure_radio.dart';
 
