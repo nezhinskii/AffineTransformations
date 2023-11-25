@@ -17,9 +17,14 @@ class _CameraPickerState extends State<CameraPicker> {
   @override
   void initState() {
     super.initState();
-    final camera = context.read<MainBloc>().state.camera;
-    _posController.text = "${camera.eye.x} ${camera.eye.y} ${camera.eye.z}";
-    _viewPointController.text = "${camera.target.x} ${camera.target.y} ${camera.target.z}";
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final camera = context.watch<MainBloc>().state.camera;
+    _posController.text = "${camera.eye.x.toStringAsFixed(2)} ${camera.eye.y.toStringAsFixed(2)} ${camera.eye.z.toStringAsFixed(2)}";
+    _viewPointController.text = "${camera.target.x.toStringAsFixed(2)} ${camera.target.y.toStringAsFixed(2)} ${camera.target.z.toStringAsFixed(2)}";
   }
 
   void _onApply(){
