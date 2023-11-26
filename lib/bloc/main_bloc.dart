@@ -19,7 +19,7 @@ class MainBloc extends Bloc<MainEvent, MainState> {
       model: Model([], []),
       camera: Camera(
         eye: Point3D(5, 5, 5),
-        target: Point3D(0, 0, 0),
+        target: Point3D(0.5, 0.5, 0.5),
         up: Point3D(0, 1, 0),
       )
     )
@@ -68,8 +68,8 @@ class MainBloc extends Bloc<MainEvent, MainState> {
   static const _pixelRatio = 100;
 
   static Offset point3DToOffset(Point3D point3d, Size size) {
-    return Offset(point3d.x / point3d.h * _pixelRatio + size.width / 2,
-        -point3d.y / point3d.h * _pixelRatio + size.height / 2);
+    return Offset((point3d.x / point3d.h * _pixelRatio + size.width / 2).roundToDouble(),
+        (-point3d.y / point3d.h * _pixelRatio + size.height / 2).roundToDouble());
   }
 
   static Point3D offsetToPoint3D(Offset offset, Size size) {

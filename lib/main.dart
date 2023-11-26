@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        brightness: Brightness.dark,
         useMaterial3: true,
       ),
       home: BlocProvider(
@@ -80,103 +80,105 @@ class _MainPageState extends State<MainPage> {
                     child: ToolBar()
                   ),
                   Expanded(
-                    child: Stack(
-                      children: [
-                        LayoutBuilder(
-                          builder: (context, constraints) {
-                            return Listener(
-                              onPointerSignal: (pointerSignal) {
-                                if (pointerSignal is PointerScrollEvent) {
-                                  context.read<MainBloc>().add(CameraScaleEvent(pointerSignal.scrollDelta.dy));
-                                }
-                              },
-                              child: GestureDetector(
-                                onPanDown: state is CurveDrawingState ? (details) {
-                                  context.read<MainBloc>().add(CurvePanEvent(details.localPosition));
-                                } :(details) {
-                                  _previousPosition = details.localPosition;
+                    child: RepaintBoundary(
+                      child: Stack(
+                        children: [
+                          LayoutBuilder(
+                            builder: (context, constraints) {
+                              return Listener(
+                                onPointerSignal: (pointerSignal) {
+                                  if (pointerSignal is PointerScrollEvent) {
+                                    context.read<MainBloc>().add(CameraScaleEvent(pointerSignal.scrollDelta.dy));
+                                  }
                                 },
-                                onPanEnd: state is CurveDrawingState ? (details) {
-                                  context.read<MainBloc>().add(CurvePanEvent(null, Size(constraints.maxWidth, constraints.maxHeight)));
-                                }:(details) {
-                                  _previousPosition = null;
-                                },
-                                onPanUpdate: state is CurveDrawingState ? (details) {
-                                  context.read<MainBloc>().add(CurvePanEvent(details.localPosition));
-                                }:(details) {
-                                  context.read<MainBloc>().add(CameraRotationEvent(details.localPosition - _previousPosition!));
-                                  _previousPosition = details.localPosition;
-                                },
-                                child: ClipRRect(
-                                  key: canvasAreaKey,
-                                  child: CustomPaint(
-                                    foregroundPainter: switch(state){
-                                      CurveDrawingState() => CurvePainter(
-                                        path: state.path
+                                child: GestureDetector(
+                                  onPanDown: state is CurveDrawingState ? (details) {
+                                    context.read<MainBloc>().add(CurvePanEvent(details.localPosition));
+                                  } :(details) {
+                                    _previousPosition = details.localPosition;
+                                  },
+                                  onPanEnd: state is CurveDrawingState ? (details) {
+                                    context.read<MainBloc>().add(CurvePanEvent(null, Size(constraints.maxWidth, constraints.maxHeight)));
+                                  }:(details) {
+                                    _previousPosition = null;
+                                  },
+                                  onPanUpdate: state is CurveDrawingState ? (details) {
+                                    context.read<MainBloc>().add(CurvePanEvent(details.localPosition));
+                                  }:(details) {
+                                    context.read<MainBloc>().add(CameraRotationEvent(details.localPosition - _previousPosition!));
+                                    _previousPosition = details.localPosition;
+                                  },
+                                  child: ClipRRect(
+                                    key: canvasAreaKey,
+                                    child: CustomPaint(
+                                      foregroundPainter: switch(state){
+                                        CurveDrawingState() => CurvePainter(
+                                          path: state.path
+                                        ),
+                                        _ => AppPainter(
+                                            camera: state.camera,
+                                            polyhedron: state.model,
+                                            secretFeature: context.read<DiscoModel>().isEnabled
+                                        ),
+                                      },
+                                      child: Container(
+                                        color: context.watch<DiscoModel>().isEnabled ?
+                                        context.watch<DiscoModel>().color : Theme.of(context).colorScheme.background,
+                                        width: double.infinity,
+                                        height: double.infinity,
                                       ),
-                                      _ => AppPainter(
-                                          camera: state.camera,
-                                          polyhedron: state.model,
-                                          secretFeature: context.read<DiscoModel>().isEnabled
-                                      ),
-                                    },
-                                    child: Container(
-                                      color: context.watch<DiscoModel>().isEnabled ?
-                                      context.watch<DiscoModel>().color : Colors.white,
-                                      width: double.infinity,
-                                      height: double.infinity,
                                     ),
                                   ),
                                 ),
+                              );
+                            }
+                          ),
+                          Align(
+                            alignment: Alignment.bottomRight,
+                            child: Visibility(
+                              visible: context.read<DiscoModel>().isEnabled,
+                              child: SizedBox(
+                                height: MediaQuery.of(context).size.height / 2 - 100,
+                                width: MediaQuery.of(context).size.width / 2 - 200,
+                                child: Image.asset('assets/gifs/dance.gif', fit: BoxFit.contain,)
                               ),
-                            );
-                          }
-                        ),
-                        Align(
-                          alignment: Alignment.bottomRight,
-                          child: Visibility(
-                            visible: context.read<DiscoModel>().isEnabled,
-                            child: SizedBox(
-                              height: MediaQuery.of(context).size.height / 2 - 100,
-                              width: MediaQuery.of(context).size.width / 2 - 200,
-                              child: Image.asset('assets/gifs/dance.gif', fit: BoxFit.contain,)
                             ),
                           ),
-                        ),
-                        Align(
-                          alignment: Alignment.topRight,
-                          child: Visibility(
-                            visible: context.read<DiscoModel>().isEnabled,
-                            child: SizedBox(
-                              height: MediaQuery.of(context).size.height / 2 - 100,
-                              width: MediaQuery.of(context).size.width / 2  - 200,
-                              child: Image.asset('assets/gifs/spongebob.gif', fit: BoxFit.contain,)
+                          Align(
+                            alignment: Alignment.topRight,
+                            child: Visibility(
+                              visible: context.read<DiscoModel>().isEnabled,
+                              child: SizedBox(
+                                height: MediaQuery.of(context).size.height / 2 - 100,
+                                width: MediaQuery.of(context).size.width / 2  - 200,
+                                child: Image.asset('assets/gifs/spongebob.gif', fit: BoxFit.contain,)
+                              ),
                             ),
                           ),
-                        ),
-                        Align(
-                          alignment: Alignment.topLeft,
-                          child: Visibility(
-                            visible: context.read<DiscoModel>().isEnabled,
-                            child: SizedBox(
-                              height: MediaQuery.of(context).size.height / 2 - 100,
-                              width: MediaQuery.of(context).size.width / 2  - 200,
-                              child: Image.asset('assets/gifs/patrick.gif', fit: BoxFit.contain,)
+                          Align(
+                            alignment: Alignment.topLeft,
+                            child: Visibility(
+                              visible: context.read<DiscoModel>().isEnabled,
+                              child: SizedBox(
+                                height: MediaQuery.of(context).size.height / 2 - 100,
+                                width: MediaQuery.of(context).size.width / 2  - 200,
+                                child: Image.asset('assets/gifs/patrick.gif', fit: BoxFit.contain,)
+                              ),
                             ),
                           ),
-                        ),
-                        Align(
-                          alignment: Alignment.bottomLeft,
-                          child: Visibility(
-                            visible: context.read<DiscoModel>().isEnabled,
-                            child: SizedBox(
-                              height: MediaQuery.of(context).size.height / 2 - 100,
-                              width: MediaQuery.of(context).size.width / 2  - 200,
-                              child: Image.asset('assets/gifs/lizard.gif', fit: BoxFit.contain,)
+                          Align(
+                            alignment: Alignment.bottomLeft,
+                            child: Visibility(
+                              visible: context.read<DiscoModel>().isEnabled,
+                              child: SizedBox(
+                                height: MediaQuery.of(context).size.height / 2 - 100,
+                                width: MediaQuery.of(context).size.width / 2  - 200,
+                                child: Image.asset('assets/gifs/lizard.gif', fit: BoxFit.contain,)
+                              ),
                             ),
-                          ),
-                        )
-                      ],
+                          )
+                        ],
+                      ),
                     ),
                   ),
                 ],

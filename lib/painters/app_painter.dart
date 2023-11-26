@@ -14,8 +14,8 @@ class AppPainter extends CustomPainter{
   final bool secretFeature;
 
   static final _axisPaint = Paint()..strokeWidth = 1..color = Colors.deepPurple;
-  static final _polyhedronPaint = Paint()..strokeWidth = 2..color = Colors.black;
-  static const _labelStyle = TextStyle(color: Colors.black, fontSize: 16);
+  static final _polyhedronPaint = Paint()..strokeWidth = 2..color = Colors.white;
+  static const _labelStyle = TextStyle(color: Colors.white, fontSize: 16);
   static final _xLabel = TextPainter(
     text: const TextSpan(
       style: _labelStyle,
@@ -76,7 +76,6 @@ class AppPainter extends CustomPainter{
     _yLabel.paint(canvas, MainBloc.point3DToOffset(yAxis.end, size));
     canvas.drawLine(MainBloc.point3DToOffset(zAxis.start, size), MainBloc.point3DToOffset(zAxis.end, size), _axisPaint);
     _zLabel.paint(canvas, MainBloc.point3DToOffset(zAxis.end, size));
-
 
     for (var polygon in projectedPolyhedron.polygons){
       for (var i = 1; i < polygon.points.length; ++i){
