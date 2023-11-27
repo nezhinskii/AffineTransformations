@@ -19,7 +19,7 @@ class MainBloc extends Bloc<MainEvent, MainState> {
       model: Model([], []),
       camera: Camera(
         eye: Point3D(5, 5, 5),
-        target: Point3D(0.5, 0.5, 0.5),
+        target: Point3D(0, 0, 0),
         up: Point3D(0, 1, 0),
       )
     )
