@@ -331,7 +331,7 @@ class Model implements IPoints {
     return true;
   }
 
-  static final _doubleRE = RegExp(r"\-?[0-9]+(\.[0-9]+)?");
+  static final _doubleRE = RegExp(r"[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?");
 
   static final RegExp _objVertexRE = RegExp(
     "v (?<x>${_doubleRE.pattern}) (?<y>${_doubleRE.pattern}) (?<z>${_doubleRE.pattern})( ${_doubleRE.pattern})?\\D",
