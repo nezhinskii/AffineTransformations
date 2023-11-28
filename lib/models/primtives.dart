@@ -28,7 +28,7 @@ class Point3D {
 
   Point3D normalized() {
     double len = length();
-    return Point3D(x/len, y/len, z/len);
+    return Point3D(x / len, y / len, z / len);
   }
 
   Point3D cross(Point3D other) {
@@ -43,7 +43,7 @@ class Point3D {
     return x * other.x + y * other.y + z * other.z;
   }
 
-  Point3D operator *(double value){
+  Point3D operator *(double value) {
     return Point3D(x * value, y * value, z * value);
   }
 
@@ -63,7 +63,7 @@ class Point3D {
     return Point3D(x / d, y / d, z / d);
   }
 
-  double length(){
+  double length() {
     return sqrt(x * x + y * y + z * z);
   }
 }
@@ -81,7 +81,27 @@ class Polygon implements IPoints {
   @override
   final List<Point3D> points;
 
+  Point3D? _normal;
+  Point3D? _center;
   Polygon(this.points);
+
+  Point3D get normal {
+    if (_normal != null) return _normal!;
+
+    var v1 = points[1] - points[0];
+    var v2 = points[2] - points[0];
+    return v1.cross(v2);
+  }
+
+  Point3D get center {
+    if (_center != null) return _center!;
+
+    var sum = Point3D.zero();
+    for (var point in points) {
+      sum = sum + point;
+    }
+    return sum / points.length;
+  }
 }
 
 class Model implements IPoints {
@@ -152,19 +172,14 @@ class Model implements IPoints {
       ], [
         [0, 1, 2],
         [2, 3, 0],
-
         [5, 2, 1],
         [1, 6, 5],
-
         [4, 5, 6],
         [6, 7, 4],
-
         [3, 4, 7],
         [7, 0, 3],
-
         [7, 6, 1],
         [1, 0, 7],
-
         [3, 2, 5],
         [5, 4, 3],
       ]);
@@ -203,39 +218,39 @@ class Model implements IPoints {
 
   static get icosahedron => Model(
           [
-            Point3D(0, phi, 1),
-            Point3D(0, phi, -1),
-            Point3D(phi, 1, 0),
-            Point3D(-phi, 1, 0),
-            Point3D(1, 0, phi),
-            Point3D(1, 0, -phi),
-            Point3D(-1, 0, phi),
-            Point3D(-1, 0, -phi),
-            Point3D(phi, -1, 0),
-            Point3D(-phi, -1, 0),
-            Point3D(0, -phi, 1),
-            Point3D(0, -phi, -1),
+            Point3D(0, phi, 1), // 0
+            Point3D(0, phi, -1), // 1
+            Point3D(phi, 1, 0), // 2
+            Point3D(-phi, 1, 0), // 3
+            Point3D(1, 0, phi), // 4
+            Point3D(1, 0, -phi), // 5
+            Point3D(-1, 0, phi), // 6
+            Point3D(-1, 0, -phi), // 7
+            Point3D(phi, -1, 0), // 8
+            Point3D(-phi, -1, 0), // 9
+            Point3D(0, -phi, 1), // 10
+            Point3D(0, -phi, -1), // 11
           ].map((e) => e / phi).toList(),
           [
             [0, 1, 2],
-            [0, 1, 3],
+            [0, 3, 1],
             [0, 2, 4],
-            [0, 3, 6],
+            [0, 6, 3],
             [0, 4, 6],
-            [1, 2, 5],
+            [1, 5, 2],
             [1, 3, 7],
-            [1, 5, 7],
-            [2, 4, 8],
+            [1, 7, 5],
+            [2, 8, 4],
             [2, 5, 8],
             [3, 6, 9],
-            [3, 7, 9],
-            [4, 6, 10],
+            [3, 9, 7],
+            [4, 10, 6],
             [4, 8, 10],
             [5, 7, 11],
-            [5, 8, 11],
-            [6, 9, 10],
+            [5, 11, 8],
+            [6, 10, 9],
             [7, 9, 11],
-            [8, 10, 11],
+            [8, 11, 10],
             [9, 10, 11],
           ]);
 
@@ -265,19 +280,27 @@ class Model implements IPoints {
           Point3D(-phi, -iphi, 0), // 19
         ].map((e) => e / phi).toList(),
         [
-          [8, 9, 1, 16, 0],
-          [8, 9, 5, 18, 4],
-          [10, 11, 3, 17, 2],
-          [10, 11, 7, 19, 6],
-          [12, 13, 4, 8, 0],
-          [12, 13, 6, 10, 2],
-          [14, 15, 5, 9, 1],
-          [14, 15, 7, 11, 3],
-          [16, 17, 2, 12, 0],
-          [16, 17, 3, 14, 1],
-          [18, 19, 6, 13, 4],
-          [18, 19, 7, 15, 5],
+          ..._splitIntoTriangles([8, 9, 1, 16, 0]),
+          ..._splitIntoTriangles([4, 18, 5, 9, 8]),
+          ..._splitIntoTriangles([2, 17, 3, 11, 10]),
+          ..._splitIntoTriangles([10, 11, 7, 19, 6]),
+          ..._splitIntoTriangles([12, 13, 4, 8, 0]),
+          ..._splitIntoTriangles([2, 10, 6, 13, 12]),
+          ..._splitIntoTriangles([1, 9, 5, 15, 14]),
+          ..._splitIntoTriangles([14, 15, 7, 11, 3]),
+          ..._splitIntoTriangles([16, 17, 2, 12, 0]),
+          ..._splitIntoTriangles([1, 14, 3, 17, 16]),
+          ..._splitIntoTriangles([4, 13, 6, 19, 18]),
+          ..._splitIntoTriangles([18, 19, 7, 15, 5]),
         ]);
+  }
+
+  static List<List<int>> _splitIntoTriangles(List<int> indices) {
+    List<List<int>> triangles = [];
+    for (int i = 1; i < indices.length - 1; i++) {
+      triangles.add([indices[0], indices[i], indices[i + 1]]);
+    }
+    return triangles;
   }
 
   Future<bool> saveFile() async {
@@ -290,7 +313,8 @@ class Model implements IPoints {
     }
     final buffer = StringBuffer();
     for (var point in points) {
-      buffer.write("v ${point.x.toStringAsFixed(9)} ${point.y.toStringAsFixed(9)} ${point.z.toStringAsFixed(9)}\n");
+      buffer.write(
+          "v ${point.x.toStringAsFixed(9)} ${point.y.toStringAsFixed(9)} ${point.z.toStringAsFixed(9)}\n");
     }
     buffer.writeln();
     for (var polygonIndexes in polygonsByIndexes) {
@@ -352,13 +376,13 @@ class Model implements IPoints {
       var polygon = List<int>.empty(growable: true);
       // print(match.group(0)!);
       for (RegExpMatch m in _intSlashRE.allMatches(match.group(0)!)) {
-        polygon.add(int.parse(m.group(1)!)-1);
+        polygon.add(int.parse(m.group(1)!) - 1);
       }
       polygonsByIndexes.add(polygon);
       // print("polygon $polygon");
     }
 
     //return points;
-    return Model(points,polygonsByIndexes);
+    return Model(points, polygonsByIndexes);
   }
 }

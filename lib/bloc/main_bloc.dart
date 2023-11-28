@@ -15,16 +15,15 @@ part 'main_event.dart';
 part 'main_state.dart';
 
 class MainBloc extends Bloc<MainEvent, MainState> {
-  MainBloc() : super(CommonState(
-      model: Model([], []),
-      camera: Camera(
-        eye: Point3D(5, 5, 5),
-        target: Point3D(0, 0, 0),
-        up: Point3D(0, 1, 0),
-      )
-    )
-  ) {
-    on<ShowMessageEvent>((event, emit){
+  MainBloc()
+      : super(CommonState(
+            model: Model([], []),
+            camera: Camera(
+              eye: Point3D(5, 5, 5),
+              target: Point3D(0, 0, 0),
+              up: Point3D(0, 1, 0),
+            ))) {
+    on<ShowMessageEvent>((event, emit) {
       emit(state.copyWith(message: event.message));
     });
     on<PickPolyhedron>(_onPickPolyhedron);
@@ -68,8 +67,10 @@ class MainBloc extends Bloc<MainEvent, MainState> {
   static const _pixelRatio = 100;
 
   static Offset point3DToOffset(Point3D point3d, Size size) {
-    return Offset((point3d.x / point3d.h * _pixelRatio + size.width / 2).roundToDouble(),
-        (-point3d.y / point3d.h * _pixelRatio + size.height / 2).roundToDouble());
+    return Offset(
+        (point3d.x / point3d.h * _pixelRatio + size.width / 2).roundToDouble(),
+        (-point3d.y / point3d.h * _pixelRatio + size.height / 2)
+            .roundToDouble());
   }
 
   static Point3D offsetToPoint3D(Offset offset, Size size) {
@@ -161,12 +162,15 @@ class MainBloc extends Bloc<MainEvent, MainState> {
     final polygonsByIndexes = <List<int>>[];
     for (var i = 0; i < length - 1; ++i) {
       for (var j = 0; j < length - 1; ++j) {
-        polygonsByIndexes.add(
-            [i * length + j, i * (length) + (j + 1), (i + 1) * length + j]);
+        polygonsByIndexes.add([
+          i * length + j,
+          (i + 1) * length + j,
+          i * (length) + (j + 1),
+        ]);
         polygonsByIndexes.add([
           i * (length) + (j + 1),
+          (i + 1) * length + j,
           (i + 1) * length + (j + 1),
-          (i + 1) * length + j
         ]);
       }
     }
@@ -259,13 +263,13 @@ class MainBloc extends Bloc<MainEvent, MainState> {
       for (var j = 0; j < len - 1; j++) {
         finalIndices.add([
           len * ((i - 1) % divisionsNumber) + j,
+          len * (i % divisionsNumber) + j,
           len * ((i - 1) % divisionsNumber) + 1 + j,
-          len * (i % divisionsNumber) + j
         ]);
         finalIndices.add([
           len * ((i - 1) % divisionsNumber) + 1 + j,
           len * (i % divisionsNumber) + j,
-          len * (i % divisionsNumber) + 1 + j
+          len * (i % divisionsNumber) + 1 + j,
         ]);
       }
     }
@@ -274,7 +278,7 @@ class MainBloc extends Bloc<MainEvent, MainState> {
   }
 
   static const double sensitivity = 0.003;
-  void _onCameraRotation(CameraRotationEvent event, Emitter emit){
+  void _onCameraRotation(CameraRotationEvent event, Emitter emit) {
     final camera = state.camera;
     Point3D direction = camera.target - camera.eye;
     double radius = direction.length();
@@ -293,7 +297,7 @@ class MainBloc extends Bloc<MainEvent, MainState> {
     emit(state.copyWith(camera: camera.copyWith(eye: eye)));
   }
 
-  void _onCameraScale(CameraScaleEvent event, Emitter emit){
+  void _onCameraScale(CameraScaleEvent event, Emitter emit) {
     final camera = state.camera;
     Point3D direction = camera.target - camera.eye;
     double distance = direction.length();
