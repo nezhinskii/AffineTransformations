@@ -98,42 +98,42 @@ class AppPainter extends CustomPainter {
     for (int i = 0; i < projectedPolyhedron.polygons.length; ++i) {
       var curPolygon = polyhedron.polygons[i];
       var camVector = curPolygon.center - camera.eye;
-      // if (curPolygon.normal.dot(camVector) < 0) continue;
+      if (curPolygon.normal.dot(camVector) < 0) continue;
 
-      // drawTriangle(
-      //     size: size,
-      //     canvas: canvas,
-      //     point3d0: projectedPolyhedron.polygons[i].points[0],
-      //     point3d1: projectedPolyhedron.polygons[i].points[1],
-      //     point3d2: projectedPolyhedron.polygons[i].points[2],
-      //     color1: _colors[i % _colors.length],
-      //     color2: _colors[i % _colors.length],
-      //     color3: _colors[i % _colors.length]);
-      for (var j = 1; j < projectedPolyhedron.polygons[i].points.length; ++j) {
-        canvas.drawLine(
-            MainBloc.point3DToOffset(
-                projectedPolyhedron.polygons[i].points[j - 1], size),
-            MainBloc.point3DToOffset(
-                projectedPolyhedron.polygons[i].points[j], size),
-            _polyhedronPaint);
-      }
-      canvas.drawLine(
-          MainBloc.point3DToOffset(
-              projectedPolyhedron.polygons[i].points.first, size),
-          MainBloc.point3DToOffset(
-              projectedPolyhedron.polygons[i].points.last, size),
-          _polyhedronPaint);
+      drawTriangle(
+          size: size,
+          canvas: canvas,
+          point3d0: projectedPolyhedron.polygons[i].points[0],
+          point3d1: projectedPolyhedron.polygons[i].points[1],
+          point3d2: projectedPolyhedron.polygons[i].points[2],
+          color1: _colors[i % _colors.length],
+          color2: _colors[i % _colors.length],
+          color3: _colors[i % _colors.length]);
+      // for (var j = 1; j < projectedPolyhedron.polygons[i].points.length; ++j) {
+      //   canvas.drawLine(
+      //       MainBloc.point3DToOffset(
+      //           projectedPolyhedron.polygons[i].points[j - 1], size),
+      //       MainBloc.point3DToOffset(
+      //           projectedPolyhedron.polygons[i].points[j], size),
+      //       _polyhedronPaint);
+      // }
+      // canvas.drawLine(
+      //     MainBloc.point3DToOffset(
+      //         projectedPolyhedron.polygons[i].points.first, size),
+      //     MainBloc.point3DToOffset(
+      //         projectedPolyhedron.polygons[i].points.last, size),
+      //     _polyhedronPaint);
     }
-    // for (int i = 0; i < _pixels.length; ++i) {
-    //   for (int j = 0; j < _pixels[i].length; ++j) {
-    //     if (_pixels[i][j] != null) {
-    //       canvas.drawPoints(
-    //           PointMode.points,
-    //           [Offset(j.toDouble(), i.toDouble())],
-    //           _paint..color = _pixels[i][j]!);
-    //     }
-    //   }
-    // }
+    for (int i = 0; i < _pixels.length; ++i) {
+      for (int j = 0; j < _pixels[i].length; ++j) {
+        if (_pixels[i][j] != null) {
+          canvas.drawPoints(
+              PointMode.points,
+              [Offset(j.toDouble(), i.toDouble())],
+              _paint..color = _pixels[i][j]!);
+        }
+      }
+    }
   }
 
   static final _paint = Paint()
