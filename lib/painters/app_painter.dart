@@ -94,7 +94,7 @@ class AppPainter extends CustomPainter {
     canvas.drawLine(MainBloc.point3DToOffset(zAxis.start, size),
         MainBloc.point3DToOffset(zAxis.end, size), _axisPaint);
     _zLabel.paint(canvas, MainBloc.point3DToOffset(zAxis.end, size));
-    print('${projectedPolyhedron.polygons[0].points[0]}  ${polyhedron.polygons[0].points[0]}');
+
     for (int i = 0; i < projectedPolyhedron.polygons.length; ++i) {
       var curPolygon = polyhedron.polygons[i];
       var camVector = curPolygon.center - camera.eye;

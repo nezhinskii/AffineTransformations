@@ -87,7 +87,12 @@ class MainBloc extends Bloc<MainEvent, MainState> {
       PolyhedronType.icosahedron => Model.icosahedron,
       PolyhedronType.dodecahedron => Model.dodecahedron,
     };
-    emit(state.copyWith(model: newPolyhedron));
+    emit(
+      CommonState(
+        camera: state.camera,
+        model: newPolyhedron
+      )
+    );
   }
 
   void _onUpdateCamera(UpdateCamera event, Emitter emit) {
@@ -152,31 +157,6 @@ class MainBloc extends Bloc<MainEvent, MainState> {
       emit(state.copyWith(message: 'Неправильно введены ограничения или шаг'));
       return;
     }
-    // final points = <Point3D>[];
-    // var length = 0;
-    // for (var x = min; x <= max; x += step) {
-    //   length++;
-    //   for (var z = min; z <= max; z += step) {
-    //     points.add(Point3D(x, event.func(x, z), z));
-    //   }
-    // }
-    // final polygonsByIndexes = <List<int>>[];
-    // for (var i = 0; i < length - 1; ++i) {
-    //   for (var j = 0; j < length - 1; ++j) {
-    //     polygonsByIndexes.add([
-    //       i * length + j,
-    //       (i + 1) * length + j,
-    //       i * (length) + (j + 1),
-    //     ]);
-    //     polygonsByIndexes.add([
-    //       i * (length) + (j + 1),
-    //       (i + 1) * length + j,
-    //       (i + 1) * length + (j + 1),
-    //     ]);
-    //   }
-    // }
-    // final function = Model(points, polygonsByIndexes);
-    // emit(state.copyWith(model: function));
     emit(
       FloatingHorizonState(
         model: state.model,
@@ -200,7 +180,7 @@ class MainBloc extends Bloc<MainEvent, MainState> {
       drawingState.points.add(event.position!);
       emit(drawingState.copyWith());
     } else {
-      if (state is CommonState) {
+      if (state is CommonState || state is FloatingHorizonState) {
         emit(CurveDrawingState(
             model: state.model,
             camera: state.camera,
