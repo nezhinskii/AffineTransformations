@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:graphics_lab6/models/camera.dart';
 import 'package:graphics_lab6/models/matrix.dart';
 import 'package:graphics_lab6/models/polyhedron_type.dart';
@@ -151,31 +152,41 @@ class MainBloc extends Bloc<MainEvent, MainState> {
       emit(state.copyWith(message: 'Неправильно введены ограничения или шаг'));
       return;
     }
-    final points = <Point3D>[];
-    var length = 0;
-    for (var x = min; x <= max; x += step) {
-      length++;
-      for (var z = min; z <= max; z += step) {
-        points.add(Point3D(x, event.func(x, z), z));
-      }
-    }
-    final polygonsByIndexes = <List<int>>[];
-    for (var i = 0; i < length - 1; ++i) {
-      for (var j = 0; j < length - 1; ++j) {
-        polygonsByIndexes.add([
-          i * length + j,
-          (i + 1) * length + j,
-          i * (length) + (j + 1),
-        ]);
-        polygonsByIndexes.add([
-          i * (length) + (j + 1),
-          (i + 1) * length + j,
-          (i + 1) * length + (j + 1),
-        ]);
-      }
-    }
-    final function = Model(points, polygonsByIndexes);
-    emit(state.copyWith(model: function));
+    // final points = <Point3D>[];
+    // var length = 0;
+    // for (var x = min; x <= max; x += step) {
+    //   length++;
+    //   for (var z = min; z <= max; z += step) {
+    //     points.add(Point3D(x, event.func(x, z), z));
+    //   }
+    // }
+    // final polygonsByIndexes = <List<int>>[];
+    // for (var i = 0; i < length - 1; ++i) {
+    //   for (var j = 0; j < length - 1; ++j) {
+    //     polygonsByIndexes.add([
+    //       i * length + j,
+    //       (i + 1) * length + j,
+    //       i * (length) + (j + 1),
+    //     ]);
+    //     polygonsByIndexes.add([
+    //       i * (length) + (j + 1),
+    //       (i + 1) * length + j,
+    //       (i + 1) * length + (j + 1),
+    //     ]);
+    //   }
+    // }
+    // final function = Model(points, polygonsByIndexes);
+    // emit(state.copyWith(model: function));
+    emit(
+      FloatingHorizonState(
+        model: state.model,
+        camera: state.camera,
+        func: event.func,
+        min: min,
+        max: max,
+        step: step
+      )
+    );
   }
 
   void _onCurvePanEvent(CurvePanEvent event, Emitter emit) {

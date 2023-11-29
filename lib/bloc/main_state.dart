@@ -88,3 +88,37 @@ class CurveReadyState extends MainState{
       points: points ?? this.points
   );
 }
+
+class FloatingHorizonState extends MainState {
+  const FloatingHorizonState({
+    required super.model,
+    required super.camera,
+    required this.func,
+    required this.min,
+    required this.max,
+    required this.step,
+    super.message
+  });
+
+  final double Function(double, double) func;
+  final double min, max, step;
+
+  @override
+  FloatingHorizonState copyWith({
+    Model? model,
+    Camera? camera,
+    String? message,
+    double Function(double, double)? func,
+    double? min,
+    double? max,
+    double? step
+  }) => FloatingHorizonState(
+      func: func ?? this.func,
+      max: max ?? this.max,
+      min: min ?? this.min,
+      step: step ?? this.step,
+      model: model ?? this.model,
+      camera: camera ?? this.camera,
+      message: message
+  );
+}

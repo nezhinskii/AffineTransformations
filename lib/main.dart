@@ -6,6 +6,7 @@ import 'package:graphics_lab6/painters/app_painter.dart';
 import 'package:graphics_lab6/bloc/main_bloc.dart';
 import 'package:graphics_lab6/models/disco_model.dart';
 import 'package:graphics_lab6/painters/curve_painter.dart';
+import 'package:graphics_lab6/painters/floating_horizon_painter.dart';
 import 'package:graphics_lab6/widgets/toolbar.dart';
 
 void main() {
@@ -115,10 +116,18 @@ class _MainPageState extends State<MainPage> {
                                         CurveDrawingState() => CurvePainter(
                                           path: state.path
                                         ),
+                                        FloatingHorizonState() => FloatingHorizonPainter(
+                                          camera: state.camera,
+                                          step: state.step,
+                                          max: state.max,
+                                          min: state.min,
+                                          func: state.func,
+                                          secretFeature: context.read<DiscoModel>().isEnabled
+                                        ),
                                         _ => AppPainter(
-                                            camera: state.camera,
-                                            polyhedron: state.model,
-                                            secretFeature: context.read<DiscoModel>().isEnabled
+                                          camera: state.camera,
+                                          polyhedron: state.model,
+                                          secretFeature: context.read<DiscoModel>().isEnabled
                                         ),
                                       },
                                       child: Container(

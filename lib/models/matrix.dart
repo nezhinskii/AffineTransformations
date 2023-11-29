@@ -24,6 +24,25 @@ class Matrix {
     ]);
   }
 
+  Matrix.invertedView(Point3D eye, Point3D target, Point3D up) : value = []{
+    Point3D forward = (eye - target).normalized();
+    Point3D right = (up.cross(forward)).normalized();
+    Point3D u = forward.cross(right);
+    final matrix4 = Matrix4.fromList([
+      right.x, u.x, forward.x, 0,
+      right.y, u.y, forward.y, 0,
+      right.z, u.z, forward.z, 0,
+      -right.dot(eye), -u.dot(eye), -forward.dot(eye), 1
+    ]);
+    final inverted = Matrix4.inverted(matrix4);
+    value.addAll([
+      [inverted[0], inverted[1], inverted[2], inverted[3]],
+      [inverted[4], inverted[5], inverted[6], inverted[7]],
+      [inverted[8], inverted[9], inverted[10], inverted[11]],
+      [inverted[12], inverted[13], inverted[14], inverted[15]]
+    ]);
+  }
+
   Matrix.cameraPerspective(double fov, double near, double far) : this(4, 4, [
     [1.0 / tan(radians(fov) / 2.0), 0, 0, 0],
     [0, 1.0 / tan(radians(fov) / 2.0), 0, 0],

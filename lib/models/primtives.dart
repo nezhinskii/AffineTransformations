@@ -17,6 +17,8 @@ class Point3D {
 
   Point3D.zero() : this(0, 0, 0);
 
+  Point3D.fromVector(Matrix m) : x = m[0][0], y = m[0][1], z = m[0][2], h = m[0][3];
+
   updateWithVector(Matrix matrix) {
     x = matrix[0][0];
     y = matrix[0][1];
@@ -65,6 +67,28 @@ class Point3D {
 
   double length() {
     return sqrt(x * x + y * y + z * z);
+  }
+
+  @override
+  String toString() {
+    return '${x.toStringAsFixed(2)} ${y.toStringAsFixed(2)} ${z.toStringAsFixed(2)}';
+  }
+}
+
+class Line {
+  double a, b, c;
+  Line(this.a, this.b, this.c);
+  Line.fromPointsXZ(Point3D p1, Point3D p2):
+    a = (p2.z - p1.z), b = (p1.x - p2.x), c = p1.x * (p1.z - p2.z) + p1.z * (p2.x - p1.x);
+
+  Line.perpendicularXZ(Line l, Point3D p):
+    a = -l.b, b = l.a, c = l.b * p.x - l.a * p.z;
+
+  (double, double) intersect(Line other){
+    return (
+      (b * other.c - other.b * c) / (a * other.b - other.a * b),
+      (c * other.a - other.c * a) / (a * other.b - other.a * b)
+    );
   }
 }
 

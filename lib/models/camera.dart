@@ -4,7 +4,7 @@ import 'package:graphics_lab6/models/primtives.dart';
 class Camera{
   final Point3D eye, target, up;
   final double fov, nearPlane, farPlane;
-  final Matrix view, projection;
+  final Matrix view, projection, invertedView;
   final bool isPerspective;
 
   Camera({
@@ -16,6 +16,7 @@ class Camera{
     this.fov = 20,
     this.isPerspective = true
   }):view = Matrix.view(eye, target, up),
+    invertedView = Matrix.invertedView(eye, target, up),
     projection = isPerspective ?
       Matrix.cameraPerspective(fov, nearPlane, farPlane)
       : Matrix.cameraOrthographic(nearPlane, farPlane);

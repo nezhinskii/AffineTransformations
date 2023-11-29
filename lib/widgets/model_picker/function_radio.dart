@@ -35,7 +35,7 @@ class _FunctionRadioState extends State<FunctionRadio> {
   }
 
   late double Function(double, double) _selectedFunction = _pulse;
-  final _tController = TextEditingController(text: '-2 2 1e-1');
+  final _tController = TextEditingController(text: '-3 3 1e-1');
 
   @override
   Widget build(BuildContext context) {
