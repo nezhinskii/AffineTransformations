@@ -76,3 +76,8 @@ class CameraScaleEvent extends MainEvent{
   final double delta;
   const CameraScaleEvent(this.delta);
 }
+
+class FloatingHorizonScaleEvent extends MainEvent{
+  final double delta;
+  const FloatingHorizonScaleEvent(this.delta);
+}

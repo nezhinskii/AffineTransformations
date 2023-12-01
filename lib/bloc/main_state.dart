@@ -97,11 +97,12 @@ class FloatingHorizonState extends MainState {
     required this.min,
     required this.max,
     required this.step,
+    required this.pixelRatio,
     super.message
   });
 
   final double Function(double, double) func;
-  final double min, max, step;
+  final double min, max, step, pixelRatio;
 
   @override
   FloatingHorizonState copyWith({
@@ -111,7 +112,8 @@ class FloatingHorizonState extends MainState {
     double Function(double, double)? func,
     double? min,
     double? max,
-    double? step
+    double? step,
+    double? pixelRatio
   }) => FloatingHorizonState(
       func: func ?? this.func,
       max: max ?? this.max,
@@ -119,6 +121,7 @@ class FloatingHorizonState extends MainState {
       step: step ?? this.step,
       model: model ?? this.model,
       camera: camera ?? this.camera,
-      message: message
+      pixelRatio: pixelRatio ?? this.pixelRatio,
+      message: message,
   );
 }

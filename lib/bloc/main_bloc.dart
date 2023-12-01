@@ -20,6 +20,7 @@ class MainBloc extends Bloc<MainEvent, MainState> {
       : super(CommonState(
             model: Model([], []),
             camera: Camera(
+              aspect: 1,
               eye: Point3D(5, 5, 5),
               target: Point3D(0, 0, 0),
               up: Point3D(0, 1, 0),
@@ -32,6 +33,7 @@ class MainBloc extends Bloc<MainEvent, MainState> {
     on<CameraRotationEvent>(_onCameraRotation);
     on<CameraScaleEvent>(_onCameraScale);
     on<PickFunction>(_onPickFunction);
+    on<FloatingHorizonScaleEvent>(_onFloatingHorizonScale);
     on<PickRFigure>(_onPickRFigure);
     on<RotatePolyhedron>(_onRotatePolyhedron);
     on<TranslatePolyhedron>(_onTranslatePolyhedron);
@@ -69,9 +71,8 @@ class MainBloc extends Bloc<MainEvent, MainState> {
 
   static Offset point3DToOffset(Point3D point3d, Size size) {
     return Offset(
-        (point3d.x / point3d.h * _pixelRatio + size.width / 2).roundToDouble(),
-        (-point3d.y / point3d.h * _pixelRatio + size.height / 2)
-            .roundToDouble());
+        (point3d.x / point3d.h  + 1.0) * 0.5 * size.width,
+        (1.0 - point3d.y / point3d.h) * 0.5 * size.height);
   }
 
   static Point3D offsetToPoint3D(Offset offset, Size size) {
@@ -164,7 +165,8 @@ class MainBloc extends Bloc<MainEvent, MainState> {
         func: event.func,
         min: min,
         max: max,
-        step: step
+        step: step,
+        pixelRatio: 100,
       )
     );
   }
@@ -266,6 +268,14 @@ class MainBloc extends Bloc<MainEvent, MainState> {
     }
     emit(CommonState(
         model: Model(finalPoints, finalIndices), camera: state.camera));
+  }
+
+  void _onFloatingHorizonScale(FloatingHorizonScaleEvent event, Emitter emit){
+    if (state is! FloatingHorizonState){
+      return;
+    }
+    final floatingHorizonState = state as FloatingHorizonState;
+    emit(floatingHorizonState.copyWith(pixelRatio: floatingHorizonState.pixelRatio - 0.03 * event.delta));
   }
 
   static const double sensitivity = 0.003;

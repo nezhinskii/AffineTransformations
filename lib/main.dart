@@ -89,7 +89,12 @@ class _MainPageState extends State<MainPage> {
                               return Listener(
                                 onPointerSignal: (pointerSignal) {
                                   if (pointerSignal is PointerScrollEvent) {
-                                    context.read<MainBloc>().add(CameraScaleEvent(pointerSignal.scrollDelta.dy));
+                                    if (state is CommonState){
+                                      context.read<MainBloc>().add(CameraScaleEvent(pointerSignal.scrollDelta.dy));
+                                    }
+                                    if (state is FloatingHorizonState){
+                                      context.read<MainBloc>().add(FloatingHorizonScaleEvent(pointerSignal.scrollDelta.dy));
+                                    }
                                   }
                                 },
                                 child: GestureDetector(
@@ -122,7 +127,8 @@ class _MainPageState extends State<MainPage> {
                                           max: state.max,
                                           min: state.min,
                                           func: state.func,
-                                          secretFeature: context.read<DiscoModel>().isEnabled
+                                          secretFeature: context.read<DiscoModel>().isEnabled,
+                                          pixelRatio: state.pixelRatio
                                         ),
                                         _ => AppPainter(
                                           camera: state.camera,

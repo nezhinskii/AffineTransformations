@@ -14,6 +14,7 @@ class FloatingHorizonPainter extends CustomPainter{
   final Camera camera;
   final double Function(double, double) func;
   final double min, max, step;
+  final double pixelRatio;
   final bool secretFeature;
 
 
@@ -43,19 +44,23 @@ class FloatingHorizonPainter extends CustomPainter{
     ..textDirection = TextDirection.ltr
     ..layout(maxWidth: 0, minWidth: 0);
 
-  const FloatingHorizonPainter({
+  FloatingHorizonPainter({
     required this.camera,
     required this.func,
     required this.min,
     required this.max,
     required this.step,
-    required this.secretFeature
+    required this.secretFeature,
+    required this.pixelRatio
   });
 
   static const double crossStep = 0.02;
+  late final Matrix _view;
 
   @override
   void paint(Canvas canvas, Size size) {
+    _view = Matrix.view(camera.eye, camera.target, camera.up);
+
     _axisPaint.strokeWidth =
     secretFeature ? (Random().nextDouble() * 2 + 1.5) : 1;
     _axisPaint.color = secretFeature
@@ -72,20 +77,19 @@ class FloatingHorizonPainter extends CustomPainter{
         if (secretFeature) {
           point.updateWithVector(Matrix.point(point) * m);
         }
-        point.updateWithVector(Matrix.point(point) * camera.view);
-        point.updateWithVector(Matrix.point(point) * camera.projection);
+        point.updateWithVector(Matrix.point(point) * _view);
       }
     }
 
-    canvas.drawLine(MainBloc.point3DToOffset(xAxis.start, size),
-        MainBloc.point3DToOffset(xAxis.end, size), _axisPaint);
-    _xLabel.paint(canvas, MainBloc.point3DToOffset(xAxis.end, size));
-    canvas.drawLine(MainBloc.point3DToOffset(yAxis.start, size),
-        MainBloc.point3DToOffset(yAxis.end, size), _axisPaint);
-    _yLabel.paint(canvas, MainBloc.point3DToOffset(yAxis.end, size));
-    canvas.drawLine(MainBloc.point3DToOffset(zAxis.start, size),
-        MainBloc.point3DToOffset(zAxis.end, size), _axisPaint);
-    _zLabel.paint(canvas, MainBloc.point3DToOffset(zAxis.end, size));
+    canvas.drawLine(_point3DToOffset(xAxis.start, size),
+        _point3DToOffset(xAxis.end, size), _axisPaint);
+    _xLabel.paint(canvas, _point3DToOffset(xAxis.end, size));
+    canvas.drawLine(_point3DToOffset(yAxis.start, size),
+        _point3DToOffset(yAxis.end, size), _axisPaint);
+    _yLabel.paint(canvas,_point3DToOffset(yAxis.end, size));
+    canvas.drawLine(_point3DToOffset(zAxis.start, size),
+        _point3DToOffset(zAxis.end, size), _axisPaint);
+    _zLabel.paint(canvas, _point3DToOffset(zAxis.end, size));
 
     final (sides, steps) = calcPoints();
     final horizonMin = List<double>.generate(
@@ -94,11 +98,12 @@ class FloatingHorizonPainter extends CustomPainter{
     final horizonMax = List<double>.generate(
       steps.length, (index) => 0
     );
+    final path = Path();
     for (int i = 0; i < sides.length; ++i){
       final left = sides[i][0];
-      final leftProj = Point3D.fromVector(Matrix.point(left) * camera.view);
+      final leftProj = Point3D.fromVector(Matrix.point(left) * _view);
       final right = sides[i][1];
-      final rightProj = Point3D.fromVector(Matrix.point(right) * camera.view);
+      final rightProj = Point3D.fromVector(Matrix.point(right) * _view);
 
       int leftInd = ((leftProj.x - steps.first) / crossStep).floor();
       int rightInd = steps.length - ((steps.last > rightProj.x ? (steps.last - rightProj.x):0) / crossStep).floor() - 1;
@@ -112,8 +117,8 @@ class FloatingHorizonPainter extends CustomPainter{
       for (int ind = leftInd; ind <= rightInd; ind++){
         Point3D currFunc = Point3D(currPoint.x, func(currPoint.x, currPoint.z), currPoint.z);
         currPoint += pointStep;
-        final cameraPoint = Point3D.fromVector(Matrix.point(currFunc) * camera.view);
-        final canvasPoint = MainBloc.point3DToOffset(cameraPoint, size);
+        final cameraPoint = Point3D.fromVector(Matrix.point(currFunc) * _view);
+        final canvasPoint = _point3DToOffset(cameraPoint, size);
         bool visible = false;
         if (canvasPoint.dy > horizonMax[ind]){
           horizonMax[ind] = canvasPoint.dy;
@@ -125,7 +130,9 @@ class FloatingHorizonPainter extends CustomPainter{
         }
         if (visible){
           if (prevPoint != null){
-            canvas.drawLine(prevPoint, canvasPoint, Paint()..strokeWidth = 1..color = Colors.white);
+            path.lineTo(canvasPoint.dx, canvasPoint.dy);
+          } else {
+            path.moveTo(canvasPoint.dx, canvasPoint.dy);
           }
           prevPoint = canvasPoint;
         } else {
@@ -133,6 +140,14 @@ class FloatingHorizonPainter extends CustomPainter{
         }
       }
     }
+    canvas.drawPath(path, Paint()..strokeWidth = 1..color = Colors.white..style = PaintingStyle.stroke);
+  }
+
+  Offset _point3DToOffset(Point3D point3d, Size size) {
+    return Offset(
+        (point3d.x / point3d.h * pixelRatio + size.width / 2).roundToDouble(),
+        (-point3d.y / point3d.h * pixelRatio + size.height / 2)
+            .roundToDouble());
   }
 
   (List<List<Point3D>>, List<double>) calcPoints(){
@@ -149,8 +164,8 @@ class FloatingHorizonPainter extends CustomPainter{
     final stepPoint = - projectedCamera / ratio;
     int nearestIndex = 0;
     for (int i = 1; i < corners.length; ++i){
-      if ( (Matrix.point(corners[i]) * camera.view).value[0][2].abs()
-          < (Matrix.point(corners[nearestIndex]) * camera.view).value[0][2].abs()){
+      if ( (Matrix.point(corners[i]) * _view).value[0][2].abs()
+          < (Matrix.point(corners[nearestIndex]) * _view).value[0][2].abs()){
         nearestIndex = i;
       }
     }
@@ -213,12 +228,10 @@ class FloatingHorizonPainter extends CustomPainter{
 
       if (rightChanged && !between(corners[2], corners[3], rightInterX, rightInterZ)
           || leftChanged && !between(corners[0], corners[3], leftInterX, leftInterZ)){
-        // points.add([corners[3]]);
         break;
       } else {
-        Point3D rightProj = Point3D.fromVector(Matrix.point(Point3D(rightInterX, 0, rightInterZ)) * camera.view);
-        Point3D leftProj = Point3D.fromVector(Matrix.point(Point3D(leftInterX, 0, leftInterZ)) * camera.view);
-        // print('${leftProj}     ${rightProj}');
+        Point3D rightProj = Point3D.fromVector(Matrix.point(Point3D(rightInterX, 0, rightInterZ)) * _view);
+        Point3D leftProj = Point3D.fromVector(Matrix.point(Point3D(leftInterX, 0, leftInterZ)) * _view);
         if (leftProj.x > rightProj.x) {
           (leftProj, rightProj) = (rightProj, leftProj);
           points.add([Point3D(rightInterX, 0, rightInterZ), Point3D(leftInterX, 0, leftInterZ)]);

@@ -23,9 +23,6 @@ class AppPainter extends CustomPainter {
   static final _axisPaint = Paint()
     ..strokeWidth = 1
     ..color = Colors.deepPurple;
-  static final _polyhedronPaint = Paint()
-    ..strokeWidth = 2
-    ..color = Colors.white;
   static const _labelStyle = TextStyle(color: Colors.white, fontSize: 16);
   static final _xLabel = TextPainter(
       text: const TextSpan(
@@ -55,10 +52,15 @@ class AppPainter extends CustomPainter {
     required this.secretFeature,
   });
 
+  late final Matrix _view, _projection;
+
   @override
   void paint(Canvas canvas, Size size) {
+    _view = Matrix.view(camera.eye, camera.target, camera.up);
+    _projection = Matrix.cameraPerspective(camera.fov, size.width/size.height, camera.nearPlane, camera.farPlane);
+
     _zBuffer = List.generate(size.height.toInt(),
-        (_) => List.filled(size.width.toInt(), double.negativeInfinity));
+        (_) => List.filled(size.width.toInt(), double.infinity));
     _pixels = List.generate(
         size.height.toInt(), (_) => List.filled(size.width.toInt(), null));
 
@@ -78,13 +80,13 @@ class AppPainter extends CustomPainter {
         if (secretFeature) {
           point.updateWithVector(Matrix.point(point) * m);
         }
-        point.updateWithVector(Matrix.point(point) * camera.view);
-        point.updateWithVector(Matrix.point(point) * camera.projection);
+        point.updateWithVector(Matrix.point(point) * _view);
+        point.updateWithVector(Matrix.point(point) * _projection);
       }
     }
     final projectedPolyhedron = polyhedron
-        .getTransformed(camera.view)
-        .getTransformed(camera.projection);
+        .getTransformed(_view)
+        .getTransformed(_projection);
     canvas.drawLine(MainBloc.point3DToOffset(xAxis.start, size),
         MainBloc.point3DToOffset(xAxis.end, size), _axisPaint);
     _xLabel.paint(canvas, MainBloc.point3DToOffset(xAxis.end, size));
@@ -98,7 +100,7 @@ class AppPainter extends CustomPainter {
     for (int i = 0; i < projectedPolyhedron.polygons.length; ++i) {
       var curPolygon = polyhedron.polygons[i];
       var camVector = curPolygon.center - camera.eye;
-      if (curPolygon.normal.dot(camVector) < 0) continue;
+      // if (curPolygon.normal.dot(camVector) < 0) continue;
 
       drawTriangle(
           size: size,
@@ -170,11 +172,12 @@ class AppPainter extends CustomPainter {
       (p1, p2) = (p2, p1);
     }
 
-    int totalHeight = (p0.dy - p2.dy).ceil();
-    for (int i = 0; i < totalHeight; i++) {
+    double totalHeight = (p0.dy - p2.dy);
+    for (double i = 0; i < totalHeight; i++) {
+      i = min(i, totalHeight);
       bool secondHalf = i > p0.dy - p1.dy || p1.dy == p0.dy;
-      int segmentHeight =
-          (secondHalf ? p1.dy - p2.dy : p0.dy - p1.dy).ceil() + 1;
+      double segmentHeight =
+          (secondHalf ? p1.dy - p2.dy : p0.dy - p1.dy);
       double alpha = i.toDouble() / totalHeight.toDouble();
       double beta =
           (i - (secondHalf ? p0.dy - p1.dy : 0)).toDouble() / segmentHeight;
@@ -190,7 +193,8 @@ class AppPainter extends CustomPainter {
         (left, right) = (right, left);
         (leftZ, rightZ) = (rightZ, leftZ);
       }
-      for (int j = left.dx.floor(); j <= right.dx.ceil(); j++) {
+      for (double j = left.dx; j < right.dx; j += 1) {
+        j = min(j, right.dx);
         double ratio = (left.dx - right.dx).abs() < 1
             ? 1
             : (j - left.dx.toInt()).toDouble() / (right.dx - left.dx);
@@ -201,7 +205,7 @@ class AppPainter extends CustomPainter {
             point.dy.toInt() < _zBuffer.length &&
             point.dx.toInt() > 0 &&
             point.dx.toInt() < _zBuffer[0].length &&
-            _zBuffer[point.dy.toInt()][point.dx.toInt()] < z) {
+            _zBuffer[point.dy.toInt()][point.dx.toInt()] > z) {
           _zBuffer[point.dy.toInt()][point.dx.toInt()] = z;
           _pixels[point.dy.floor()][point.dx.floor()] = color1;
         }

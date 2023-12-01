@@ -43,12 +43,20 @@ class Matrix {
     ]);
   }
 
-  Matrix.cameraPerspective(double fov, double near, double far) : this(4, 4, [
-    [1.0 / tan(radians(fov) / 2.0), 0, 0, 0],
-    [0, 1.0 / tan(radians(fov) / 2.0), 0, 0],
-    [0, 0, far / (far - near), -1],
-    [0, 0, -far * near / (far - near), 0]
-  ]);
+  Matrix.cameraPerspective(double fov, double aspect, double near, double far) : value = []{
+    // value.addAll([
+    //   [1.0 / tan(radians(fov) / 2.0), 0, 0, 0],
+    //   [0, 1.0 / tan(radians(fov) / 2.0), 0, 0],
+    //   [0, 0, far / (far - near), -1],
+    //   [0, 0, -far * near / (far - near), 0]
+    // ]);
+    value.addAll([
+      [1.0 / tan(radians(fov) / 2.0) / aspect, 0, 0, 0],
+      [0, 1.0 / tan(radians(fov) / 2.0), 0, 0],
+      [0, 0, (far + near) / (near - far), -1],
+      [0, 0, (2 * far * near) / (near - far), 0]
+    ]);
+  }
 
   Matrix.cameraOrthographic(double near, double far) : value = []{
     double height = 2;
