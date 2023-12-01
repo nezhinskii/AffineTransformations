@@ -14,7 +14,7 @@ class AppPainter extends CustomPainter {
   final Camera camera;
   final bool secretFeature;
   late List<List<double>> _zBuffer;
-  late List<List<Color?>> _pixels;
+  late List<List<({Color color, Offset pos})?>> _pixels;
 
   static final _colors = List.generate(
       50,
@@ -100,7 +100,7 @@ class AppPainter extends CustomPainter {
     for (int i = 0; i < projectedPolyhedron.polygons.length; ++i) {
       var curPolygon = polyhedron.polygons[i];
       var camVector = curPolygon.center - camera.eye;
-      // if (curPolygon.normal.dot(camVector) < 0) continue;
+      if (curPolygon.normal.dot(camVector) < 0) continue;
 
       drawTriangle(
           size: size,
@@ -131,8 +131,8 @@ class AppPainter extends CustomPainter {
         if (_pixels[i][j] != null) {
           canvas.drawPoints(
               PointMode.points,
-              [Offset(j.toDouble(), i.toDouble())],
-              _paint..color = _pixels[i][j]!);
+              [_pixels[i][j]!.pos],
+              _paint..color = _pixels[i][j]!.color);
         }
       }
     }
@@ -199,7 +199,7 @@ class AppPainter extends CustomPainter {
             ? 1
             : (j - left.dx.toInt()).toDouble() / (right.dx - left.dx);
         Offset p = left + (right - left) * ratio;
-        Offset point = Offset(p.dx.floorToDouble(), p.dy.floorToDouble());
+        Offset point = Offset(p.dx, p.dy);
         double z = leftZ + (rightZ - leftZ) * ratio;
         if (point.dy.toInt() > 0 &&
             point.dy.toInt() < _zBuffer.length &&
@@ -207,7 +207,10 @@ class AppPainter extends CustomPainter {
             point.dx.toInt() < _zBuffer[0].length &&
             _zBuffer[point.dy.toInt()][point.dx.toInt()] > z) {
           _zBuffer[point.dy.toInt()][point.dx.toInt()] = z;
-          _pixels[point.dy.floor()][point.dx.floor()] = color1;
+          _pixels[point.dy.floor()][point.dx.floor()] = (
+            color: color1,
+            pos: point
+          );
         }
       }
     }
