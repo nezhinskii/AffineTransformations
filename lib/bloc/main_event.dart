@@ -48,36 +48,44 @@ class MirrorPolyhedron extends MainEvent {
   const MirrorPolyhedron(this.plane);
 }
 
-class CurvePanEvent extends MainEvent{
+class CurvePanEvent extends MainEvent {
   final Offset? position;
   final Size? size;
   const CurvePanEvent(this.position, [this.size]);
 }
 
-class SaveObjEvent extends MainEvent{
+class SaveObjEvent extends MainEvent {
   const SaveObjEvent();
 }
 
-class LoadObjEvent extends MainEvent{
+class LoadObjEvent extends MainEvent {
   const LoadObjEvent();
 }
 
-class ShowMessageEvent extends MainEvent{
+class LoadTextureEvent extends MainEvent {
+  const LoadTextureEvent();
+}
+
+class DeleteTextureEvent extends MainEvent {
+  const DeleteTextureEvent();
+}
+
+class ShowMessageEvent extends MainEvent {
   final String message;
   const ShowMessageEvent(this.message);
 }
 
-class CameraRotationEvent extends MainEvent{
+class CameraRotationEvent extends MainEvent {
   final Offset delta;
   const CameraRotationEvent(this.delta);
 }
 
-class CameraScaleEvent extends MainEvent{
+class CameraScaleEvent extends MainEvent {
   final double delta;
   const CameraScaleEvent(this.delta);
 }
 
-class FloatingHorizonScaleEvent extends MainEvent{
+class FloatingHorizonScaleEvent extends MainEvent {
   final double delta;
   const FloatingHorizonScaleEvent(this.delta);
 }

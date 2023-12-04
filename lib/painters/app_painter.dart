@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'dart:ui';
+import 'package:image/image.dart' as img;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -57,7 +58,8 @@ class AppPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     _view = Matrix.view(camera.eye, camera.target, camera.up);
-    _projection = Matrix.cameraPerspective(camera.fov, size.width/size.height, camera.nearPlane, camera.farPlane);
+    _projection = Matrix.cameraPerspective(camera.fov, size.width / size.height,
+        camera.nearPlane, camera.farPlane);
 
     _zBuffer = List.generate(size.height.toInt(),
         (_) => List.filled(size.width.toInt(), double.infinity));
@@ -84,9 +86,8 @@ class AppPainter extends CustomPainter {
         point.updateWithVector(Matrix.point(point) * _projection);
       }
     }
-    final projectedPolyhedron = polyhedron
-        .getTransformed(_view)
-        .getTransformed(_projection);
+    final projectedPolyhedron =
+        polyhedron.getTransformed(_view).getTransformed(_projection);
     canvas.drawLine(MainBloc.point3DToOffset(xAxis.start, size),
         MainBloc.point3DToOffset(xAxis.end, size), _axisPaint);
     _xLabel.paint(canvas, MainBloc.point3DToOffset(xAxis.end, size));
@@ -103,14 +104,14 @@ class AppPainter extends CustomPainter {
       if (curPolygon.normal.dot(camVector) < 0) continue;
 
       drawTriangle(
-          size: size,
-          canvas: canvas,
-          point3d0: projectedPolyhedron.polygons[i].points[0],
-          point3d1: projectedPolyhedron.polygons[i].points[1],
-          point3d2: projectedPolyhedron.polygons[i].points[2],
-          color1: _colors[i % _colors.length],
-          color2: _colors[i % _colors.length],
-          color3: _colors[i % _colors.length]);
+        size: size,
+        canvas: canvas,
+        point3d0: projectedPolyhedron.polygons[i].points[0],
+        point3d1: projectedPolyhedron.polygons[i].points[1],
+        point3d2: projectedPolyhedron.polygons[i].points[2],
+        color: _colors[i % _colors.length],
+        texture: projectedPolyhedron.texture,
+      );
       // for (var j = 1; j < projectedPolyhedron.polygons[i].points.length; ++j) {
       //   canvas.drawLine(
       //       MainBloc.point3DToOffset(
@@ -129,9 +130,7 @@ class AppPainter extends CustomPainter {
     for (int i = 0; i < _pixels.length; ++i) {
       for (int j = 0; j < _pixels[i].length; ++j) {
         if (_pixels[i][j] != null) {
-          canvas.drawPoints(
-              PointMode.points,
-              [_pixels[i][j]!.pos],
+          canvas.drawPoints(PointMode.points, [_pixels[i][j]!.pos],
               _paint..color = _pixels[i][j]!.color);
         }
       }
@@ -151,66 +150,100 @@ class AppPainter extends CustomPainter {
     required Point3D point3d0,
     required Point3D point3d1,
     required Point3D point3d2,
-    required Color color1,
-    required Color color2,
-    required Color color3,
+    required Color color,
+    required img.Image? texture,
   }) {
     Offset p0 = MainBloc.point3DToOffset(point3d0, size);
     Offset p1 = MainBloc.point3DToOffset(point3d1, size);
     Offset p2 = MainBloc.point3DToOffset(point3d2, size);
 
+    Offset textureCoord0 = Offset(0.0, texture?.width.toDouble() ?? 0.0);
+    Offset textureCoord1 = Offset(0.0, 0.0);
+    Offset textureCoord2 = Offset(texture?.height.toDouble() ?? 0.0, 0.0);
+
     if (p0.dy < p1.dy) {
       (point3d0, point3d1) = (point3d1, point3d0);
       (p0, p1) = (p1, p0);
+      (textureCoord0, textureCoord1) = (textureCoord1, textureCoord0);
     }
     if (p0.dy < p2.dy) {
       (point3d0, point3d2) = (point3d2, point3d0);
       (p0, p2) = (p2, p0);
+      (textureCoord0, textureCoord2) = (textureCoord2, textureCoord0);
     }
     if (p1.dy < p2.dy) {
       (point3d1, point3d2) = (point3d2, point3d1);
       (p1, p2) = (p2, p1);
+      (textureCoord1, textureCoord2) = (textureCoord2, textureCoord1);
     }
 
     double totalHeight = (p0.dy - p2.dy);
     for (double i = 0; i < totalHeight; i++) {
       i = min(i, totalHeight);
+
       bool secondHalf = i > p0.dy - p1.dy || p1.dy == p0.dy;
-      double segmentHeight =
-          (secondHalf ? p1.dy - p2.dy : p0.dy - p1.dy);
+      double segmentHeight = (secondHalf ? p1.dy - p2.dy : p0.dy - p1.dy);
+
       double alpha = i.toDouble() / totalHeight.toDouble();
       double beta =
           (i - (secondHalf ? p0.dy - p1.dy : 0)).toDouble() / segmentHeight;
+
       Offset l = p0 + (p2 - p0) * alpha;
       Offset left = Offset(l.dx.floorToDouble(), l.dy.floorToDouble());
+
       Offset r = secondHalf ? p1 + (p2 - p1) * beta : p0 + (p1 - p0) * beta;
       Offset right = Offset(r.dx.floorToDouble(), r.dy.floorToDouble());
+
       double leftZ = (point3d0 + (point3d2 - point3d0) * alpha).z;
       double rightZ = secondHalf
           ? (point3d1 + (point3d2 - point3d1) * beta).z
           : (point3d0 + (point3d1 - point3d0) * beta).z;
+
+      Offset textureCoordL =
+          textureCoord0 + (textureCoord2 - textureCoord0) * alpha;
+      Offset textureCoordR = secondHalf
+          ? textureCoord1 + (textureCoord2 - textureCoord1) * beta
+          : textureCoord0 + (textureCoord1 - textureCoord0) * beta;
+
       if (left.dx > right.dx) {
         (left, right) = (right, left);
         (leftZ, rightZ) = (rightZ, leftZ);
+        (textureCoordL, textureCoordR) = (textureCoordR, textureCoordL);
       }
+
       for (double j = left.dx; j < right.dx; j += 1) {
         j = min(j, right.dx);
+
         double ratio = (left.dx - right.dx).abs() < 1
             ? 1
             : (j - left.dx.toInt()).toDouble() / (right.dx - left.dx);
-        Offset p = left + (right - left) * ratio;
-        Offset point = Offset(p.dx, p.dy);
+
+        Offset point = left + (right - left) * ratio;
+
+        //Offset point = Offset(p.dx, p.dy);
+
+        Offset textureCoord =
+            textureCoordL + (textureCoordR - textureCoordL) * ratio;
+
         double z = leftZ + (rightZ - leftZ) * ratio;
+
         if (point.dy.toInt() > 0 &&
             point.dy.toInt() < _zBuffer.length &&
             point.dx.toInt() > 0 &&
             point.dx.toInt() < _zBuffer[0].length &&
             _zBuffer[point.dy.toInt()][point.dx.toInt()] > z) {
           _zBuffer[point.dy.toInt()][point.dx.toInt()] = z;
-          _pixels[point.dy.floor()][point.dx.floor()] = (
-            color: color1,
-            pos: point
+
+          var curPixel = texture?.getPixel(
+            textureCoord.dx.toInt() % texture.width,
+            textureCoord.dy.toInt() % texture.height,
           );
+          Color curColor = curPixel != null
+              ? Color.fromRGBO(
+                  curPixel.r.toInt(), curPixel.g.toInt(), curPixel.b.toInt(), 1)
+              : color;
+          _pixels[point.dy.floor()][point.dx.floor()] =
+              (color: curColor, pos: point);
         }
       }
     }

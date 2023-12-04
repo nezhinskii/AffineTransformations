@@ -7,6 +7,7 @@ import 'package:graphics_lab6/widgets/model_picker/model_picker.dart';
 import 'package:graphics_lab6/widgets/projcetion_picker/projection_picker.dart';
 import 'package:graphics_lab6/widgets/rotation_picker.dart';
 import 'package:graphics_lab6/widgets/scaling_picker.dart';
+import 'package:graphics_lab6/widgets/texturing_picker.dart';
 import 'package:graphics_lab6/widgets/translation_picker.dart';
 
 import 'mirroring_picker.dart';
@@ -20,7 +21,8 @@ class ToolBar extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
         child: Column(
           children: [
-            const HidingPanel(title: Text("Настройки камеры"), child: CameraPicker()),
+            const HidingPanel(
+                title: Text("Настройки камеры"), child: CameraPicker()),
             const HidingPanel(title: Text("Модель"), child: ModelPicker()),
             const HidingPanel(title: Text("Вращение"), child: RotationPicker()),
             const HidingPanel(
@@ -35,6 +37,13 @@ class ToolBar extends StatelessWidget {
               title: Text("Отражение"),
               child: MirroringPicker(),
             ),
+            const HidingPanel(
+              title: Text("Текстурирование"),
+              child: TexturingPicker(),
+            ),
+            const SizedBox(
+              height: 15,
+            ),
             OutlinedButton(
               onPressed: () {
                 BlocProvider.of<MainBloc>(context).add(const SaveObjEvent());
@@ -43,7 +52,9 @@ class ToolBar extends StatelessWidget {
                 "Сохранить",
               ),
             ),
-            const SizedBox(height: 15,),
+            const SizedBox(
+              height: 15,
+            ),
             OutlinedButton(
               onPressed: () {
                 BlocProvider.of<MainBloc>(context).add(const LoadObjEvent());

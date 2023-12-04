@@ -4,6 +4,7 @@ import 'dart:math';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:graphics_lab6/models/matrix.dart';
+import 'package:image/image.dart';
 
 abstract interface class IPoints {
   List<Point3D> get points;
@@ -17,7 +18,11 @@ class Point3D {
 
   Point3D.zero() : this(0, 0, 0);
 
-  Point3D.fromVector(Matrix m) : x = m[0][0], y = m[0][1], z = m[0][2], h = m[0][3];
+  Point3D.fromVector(Matrix m)
+      : x = m[0][0],
+        y = m[0][1],
+        z = m[0][2],
+        h = m[0][3];
 
   updateWithVector(Matrix matrix) {
     x = matrix[0][0];
@@ -78,13 +83,17 @@ class Point3D {
 class Line {
   double a, b, c;
   Line(this.a, this.b, this.c);
-  Line.fromPointsXZ(Point3D p1, Point3D p2):
-    a = (p2.z - p1.z), b = (p1.x - p2.x), c = p1.x * (p1.z - p2.z) + p1.z * (p2.x - p1.x);
+  Line.fromPointsXZ(Point3D p1, Point3D p2)
+      : a = (p2.z - p1.z),
+        b = (p1.x - p2.x),
+        c = p1.x * (p1.z - p2.z) + p1.z * (p2.x - p1.x);
 
-  Line.perpendicularXZ(Line l, Point3D p):
-    a = -l.b, b = l.a, c = l.b * p.x - l.a * p.z;
+  Line.perpendicularXZ(Line l, Point3D p)
+      : a = -l.b,
+        b = l.a,
+        c = l.b * p.x - l.a * p.z;
 
-  (double, double) intersect(Line other){
+  (double, double) intersect(Line other) {
     return (
       (b * other.c - other.b * c) / (a * other.b - other.a * b),
       (c * other.a - other.c * a) / (a * other.b - other.a * b)
@@ -130,11 +139,12 @@ class Polygon implements IPoints {
 
 class Model implements IPoints {
   final List<Polygon> polygons;
+  Image? texture;
   @override
   final List<Point3D> points;
   final List<List<int>> polygonsByIndexes;
 
-  Model(this.points, this.polygonsByIndexes) : polygons = [] {
+  Model(this.points, this.polygonsByIndexes, {this.texture}) : polygons = [] {
     for (var polygonIndexes in polygonsByIndexes) {
       polygons.add(Polygon(List.generate(
           polygonIndexes.length, (i) => points[polygonIndexes[i]])));
@@ -159,7 +169,8 @@ class Model implements IPoints {
 
   Model copy() {
     return Model(List.generate(points.length, (index) => points[index].copy()),
-        polygonsByIndexes);
+        polygonsByIndexes,
+        texture: texture);
   }
 
   Model concat(Model other) {

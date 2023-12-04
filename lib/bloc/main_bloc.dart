@@ -1,6 +1,8 @@
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:bloc/bloc.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:graphics_lab6/models/camera.dart';
@@ -10,6 +12,7 @@ import 'package:graphics_lab6/models/primtives.dart';
 import 'package:graphics_lab6/widgets/mirroring_picker.dart';
 import 'package:meta/meta.dart';
 import 'package:vector_math/vector_math.dart';
+import 'package:image/image.dart' as img;
 
 part 'main_event.dart';
 
@@ -40,6 +43,9 @@ class MainBloc extends Bloc<MainEvent, MainState> {
     on<ScalePolyhedron>(_onScalePolyhedron);
     on<MirrorPolyhedron>(_onMirrorPolyhedron);
     on<CurvePanEvent>(_onCurvePanEvent);
+    on<LoadTextureEvent>(_onLoadTextureEvent);
+    on<DeleteTextureEvent>((event, emit) =>
+        emit(state.copyWith(model: state.model..texture = null)));
     on<SaveObjEvent>((event, emit) async {
       final res = await state.model.saveFile();
       final message = res ? "Файл сохранён" : "Файл не сохранён";
@@ -70,8 +76,7 @@ class MainBloc extends Bloc<MainEvent, MainState> {
   static const _pixelRatio = 100;
 
   static Offset point3DToOffset(Point3D point3d, Size size) {
-    return Offset(
-        (point3d.x / point3d.h  + 1.0) * 0.5 * size.width,
+    return Offset((point3d.x / point3d.h + 1.0) * 0.5 * size.width,
         (1.0 - point3d.y / point3d.h) * 0.5 * size.height);
   }
 
@@ -81,19 +86,16 @@ class MainBloc extends Bloc<MainEvent, MainState> {
   }
 
   void _onPickPolyhedron(PickPolyhedron event, Emitter emit) {
-    final newPolyhedron = switch (event.polyhedronType) {
+    final Model newPolyhedron = switch (event.polyhedronType) {
       PolyhedronType.tetrahedron => Model.tetrahedron,
       PolyhedronType.cube => Model.cube,
       PolyhedronType.octahedron => Model.octahedron,
       PolyhedronType.icosahedron => Model.icosahedron,
       PolyhedronType.dodecahedron => Model.dodecahedron,
     };
-    emit(
-      CommonState(
+    emit(CommonState(
         camera: state.camera,
-        model: newPolyhedron
-      )
-    );
+        model: newPolyhedron..texture = state.model.texture));
   }
 
   void _onUpdateCamera(UpdateCamera event, Emitter emit) {
@@ -158,17 +160,15 @@ class MainBloc extends Bloc<MainEvent, MainState> {
       emit(state.copyWith(message: 'Неправильно введены ограничения или шаг'));
       return;
     }
-    emit(
-      FloatingHorizonState(
-        model: state.model,
-        camera: state.camera,
-        func: event.func,
-        min: min,
-        max: max,
-        step: step,
-        pixelRatio: 100,
-      )
-    );
+    emit(FloatingHorizonState(
+      model: state.model,
+      camera: state.camera,
+      func: event.func,
+      min: min,
+      max: max,
+      step: step,
+      pixelRatio: 100,
+    ));
   }
 
   void _onCurvePanEvent(CurvePanEvent event, Emitter emit) {
@@ -267,15 +267,17 @@ class MainBloc extends Bloc<MainEvent, MainState> {
       }
     }
     emit(CommonState(
-        model: Model(finalPoints, finalIndices), camera: state.camera));
+        model: Model(finalPoints, finalIndices, texture: state.model.texture),
+        camera: state.camera));
   }
 
-  void _onFloatingHorizonScale(FloatingHorizonScaleEvent event, Emitter emit){
-    if (state is! FloatingHorizonState){
+  void _onFloatingHorizonScale(FloatingHorizonScaleEvent event, Emitter emit) {
+    if (state is! FloatingHorizonState) {
       return;
     }
     final floatingHorizonState = state as FloatingHorizonState;
-    emit(floatingHorizonState.copyWith(pixelRatio: floatingHorizonState.pixelRatio - 0.03 * event.delta));
+    emit(floatingHorizonState.copyWith(
+        pixelRatio: floatingHorizonState.pixelRatio - 0.03 * event.delta));
   }
 
   static const double sensitivity = 0.003;
@@ -306,5 +308,20 @@ class MainBloc extends Bloc<MainEvent, MainState> {
 
     final eye = camera.target - direction.normalized() * distance;
     emit(state.copyWith(camera: camera.copyWith(eye: eye)));
+  }
+
+  void _onLoadTextureEvent(LoadTextureEvent event, Emitter emit) async {
+    final pick = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+      withData: true,
+    );
+
+    if (pick == null || !pick.isSinglePick) {
+      return null;
+    }
+
+    Uint8List bytes = pick.files.first.bytes!;
+    var texture = img.decodeImage(Uint8List.fromList(bytes));
+    emit(state.copyWith(model: state.model..texture = texture));
   }
 }
