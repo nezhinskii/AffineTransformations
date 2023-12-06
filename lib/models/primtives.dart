@@ -375,7 +375,8 @@ class Model implements IPoints {
     buffer.writeln();
     for (var polygonIndexes in polygonsByIndexes) {
       buffer.write("f ");
-      for (var index in polygonIndexes) {
+      var idcs = [polygonIndexes[0], polygonIndexes[2], polygonIndexes[1]];
+      for (var index in idcs) {
         buffer.write("${index + 1} ");
       }
       buffer.write("\n");
@@ -435,6 +436,9 @@ class Model implements IPoints {
       for (RegExpMatch m in _intSlashRE.allMatches(match.group(0)!)) {
         polygon.add(int.parse(m.group(1)!) - 1);
       }
+      int t = polygon[1];
+      polygon[1] = polygon[2];
+      polygon[2] = t;
       polygonsByIndexes.add(polygon);
       // print("polygon $polygon");
     }
