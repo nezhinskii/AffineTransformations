@@ -218,12 +218,10 @@ class AppPainter extends CustomPainter {
 
   Point3D lightVector(Point3D point) {
     return Point3D(
-        - light.pos.x + point.x, - light.pos.y + point.y, - light.pos.z + point.z); //?
+        light.pos.x - point.x, light.pos.y - point.y, light.pos.z - point.z); //?
   }
 
   double lambertIntensity(Point3D lightVector, Point3D normal) {
-    lightVector = lightVector.normalized();
-    normal = normal.normalized();
     var cos =  (lightVector.x * normal.x +
             lightVector.y * normal.y +
             lightVector.z * normal.z) /
@@ -357,12 +355,6 @@ class AppPainter extends CustomPainter {
     Offset p0 = MainBloc.point3DToOffset(point3d0, size);
     Offset p1 = MainBloc.point3DToOffset(point3d1, size);
     Offset p2 = MainBloc.point3DToOffset(point3d2, size);
-    Color color = Color.fromRGBO(
-      light.color.x.round(),
-      light.color.y.round(),
-      light.color.z.round(),
-      1.0,
-    );
     if (p0.dy < p1.dy) {
       (point3d0, point3d1) = (point3d1, point3d0);
       (p0, p1) = (p1, p0);
