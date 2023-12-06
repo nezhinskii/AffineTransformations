@@ -6,6 +6,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:graphics_lab6/models/camera.dart';
+import 'package:graphics_lab6/models/light.dart';
 import 'package:graphics_lab6/models/matrix.dart';
 import 'package:graphics_lab6/models/polyhedron_type.dart';
 import 'package:graphics_lab6/models/primtives.dart';
@@ -20,19 +21,25 @@ part 'main_state.dart';
 
 class MainBloc extends Bloc<MainEvent, MainState> {
   MainBloc()
-      : super(CommonState(
+      : super(
+          CommonState(
             model: Model([], []),
             camera: Camera(
               aspect: 1,
               eye: Point3D(5, 5, 5),
               target: Point3D(0, 0, 0),
               up: Point3D(0, 1, 0),
-            ))) {
+            ),
+            light: Light(),
+          ),
+        ) {
     on<ShowMessageEvent>((event, emit) {
       emit(state.copyWith(message: event.message));
     });
     on<PickPolyhedron>(_onPickPolyhedron);
     on<UpdateCamera>(_onUpdateCamera);
+    on<UpdateLight>(_onUpdateLight);
+    on<ToggleLight>(_onToggleLight);
     on<CameraRotationEvent>(_onCameraRotation);
     on<CameraScaleEvent>(_onCameraScale);
     on<PickFunction>(_onPickFunction);
@@ -64,6 +71,7 @@ class MainBloc extends Bloc<MainEvent, MainState> {
           CommonState(
             model: newModel,
             camera: state.camera,
+            light: state.light,
             message: state.message,
           ),
         );
@@ -93,13 +101,25 @@ class MainBloc extends Bloc<MainEvent, MainState> {
       PolyhedronType.icosahedron => Model.icosahedron,
       PolyhedronType.dodecahedron => Model.dodecahedron,
     };
-    emit(CommonState(
+    emit(
+      CommonState(
         camera: state.camera,
-        model: newPolyhedron..texture = state.model.texture));
+        light: state.light,
+        model: newPolyhedron..texture = state.model.texture,
+      ),
+    );
   }
 
   void _onUpdateCamera(UpdateCamera event, Emitter emit) {
     emit(state.copyWith(camera: event.camera));
+  }
+
+  void _onUpdateLight(UpdateLight event, Emitter emit) {
+    emit(state.copyWith(light: event.light));
+  }
+
+  void _onToggleLight(ToggleLight event, Emitter emit) {
+    emit(state.copyWith(lightMode: !state.lightMode));
   }
 
   void _onRotatePolyhedron(RotatePolyhedron event, Emitter emit) {
@@ -163,6 +183,7 @@ class MainBloc extends Bloc<MainEvent, MainState> {
     emit(FloatingHorizonState(
       model: state.model,
       camera: state.camera,
+      light: state.light,
       func: event.func,
       min: min,
       max: max,
@@ -186,16 +207,21 @@ class MainBloc extends Bloc<MainEvent, MainState> {
         emit(CurveDrawingState(
             model: state.model,
             camera: state.camera,
+            light: state.light,
             path: Path(),
             points: []));
       } else {
         final drawingState = (state as CurveDrawingState);
-        emit(CurveReadyState(
+        emit(
+          CurveReadyState(
             model: drawingState.model,
             points: drawingState.points
                 .map((point) => offsetToPoint3D(point, event.size!))
                 .toList(),
-            camera: drawingState.camera));
+            camera: drawingState.camera,
+            light: state.light,
+          ),
+        );
       }
     }
   }
@@ -205,20 +231,28 @@ class MainBloc extends Bloc<MainEvent, MainState> {
     int divisionsNumber;
     Point3D rotationAxis;
     if (vectorStr.length != 3) {
-      emit(CommonState(
+      emit(
+        CommonState(
           model: state.model,
           camera: state.camera,
-          message: 'Неверное количество точек'));
+          message: 'Неверное количество точек',
+          light: state.light,
+        ),
+      );
     }
     try {
       rotationAxis = Point3D(double.parse(vectorStr[0]),
           double.parse(vectorStr[1]), double.parse(vectorStr[2]));
       divisionsNumber = int.parse(event.divisionsStr);
     } catch (_) {
-      emit(CommonState(
+      emit(
+        CommonState(
           model: state.model,
           camera: state.camera,
-          message: ';?:№%!*;№%:?!:(*?;!)(*№;()!№'));
+          message: ';?:№%!*;№%:?!:(*?;!)(*№;()!№',
+          light: state.light,
+        ),
+      );
       return;
     }
 
@@ -266,9 +300,13 @@ class MainBloc extends Bloc<MainEvent, MainState> {
         ]);
       }
     }
-    emit(CommonState(
+    emit(
+      CommonState(
         model: Model(finalPoints, finalIndices, texture: state.model.texture),
-        camera: state.camera));
+        camera: state.camera,
+        light: state.light,
+      ),
+    );
   }
 
   void _onFloatingHorizonScale(FloatingHorizonScaleEvent event, Emitter emit) {
@@ -281,6 +319,7 @@ class MainBloc extends Bloc<MainEvent, MainState> {
   }
 
   static const double sensitivity = 0.003;
+
   void _onCameraRotation(CameraRotationEvent event, Emitter emit) {
     final camera = state.camera;
     Point3D direction = camera.target - camera.eye;

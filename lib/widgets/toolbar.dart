@@ -7,6 +7,7 @@ import 'package:graphics_lab6/widgets/model_picker/model_picker.dart';
 import 'package:graphics_lab6/widgets/projcetion_picker/projection_picker.dart';
 import 'package:graphics_lab6/widgets/rotation_picker.dart';
 import 'package:graphics_lab6/widgets/scaling_picker.dart';
+import 'package:graphics_lab6/widgets/shading_picker.dart';
 import 'package:graphics_lab6/widgets/texturing_picker.dart';
 import 'package:graphics_lab6/widgets/translation_picker.dart';
 
@@ -40,6 +41,10 @@ class ToolBar extends StatelessWidget {
             const HidingPanel(
               title: Text("Текстурирование"),
               child: TexturingPicker(),
+            ),
+            const HidingPanel(
+              title: Text("Освещение"),
+              child: ShadingPicker(),
             ),
             const SizedBox(
               height: 15,

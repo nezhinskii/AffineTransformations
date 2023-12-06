@@ -15,6 +15,15 @@ class UpdateCamera extends MainEvent {
   const UpdateCamera(this.camera);
 }
 
+class UpdateLight extends MainEvent {
+  final Light light;
+  const UpdateLight(this.light);
+}
+
+class ToggleLight extends MainEvent {
+  const ToggleLight();
+}
+
 class PickFunction extends MainEvent {
   final double Function(double, double) func;
   final String restrictions;

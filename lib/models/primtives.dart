@@ -6,7 +6,10 @@ import 'package:file_picker/file_picker.dart';
 import 'package:graphics_lab6/models/matrix.dart';
 import 'package:image/image.dart';
 
-abstract interface class IPoints {
+abstract
+interface
+
+class IPoints {
   List<Point3D> get points;
 }
 
@@ -76,13 +79,16 @@ class Point3D {
 
   @override
   String toString() {
-    return '${x.toStringAsFixed(2)} ${y.toStringAsFixed(2)} ${z.toStringAsFixed(2)}';
+    return '${x.toStringAsFixed(2)} ${y.toStringAsFixed(2)} ${z.toStringAsFixed(
+        2)}';
   }
 }
 
 class Line {
   double a, b, c;
+
   Line(this.a, this.b, this.c);
+
   Line.fromPointsXZ(Point3D p1, Point3D p2)
       : a = (p2.z - p1.z),
         b = (p1.x - p2.x),
@@ -93,11 +99,20 @@ class Line {
         b = l.a,
         c = l.b * p.x - l.a * p.z;
 
-  (double, double) intersect(Line other) {
+  (
+
+  double
+
+  ,
+
+  double
+
+  )
+
+  intersect(Line other) {
     return (
-      (b * other.c - other.b * c) / (a * other.b - other.a * b),
-      (c * other.a - other.c * a) / (a * other.b - other.a * b)
-    );
+        (b * other.c - other.b * c) / (a * other.b - other.a * b),
+        (c * other.a - other.c * a) / (a * other.b - other.a * b));
   }
 }
 
@@ -116,6 +131,7 @@ class Polygon implements IPoints {
 
   Point3D? _normal;
   Point3D? _center;
+
   Polygon(this.points);
 
   Point3D get normal {
@@ -195,7 +211,8 @@ class Model implements IPoints {
     return Model(resPoints, resIndexes);
   }
 
-  static Model get cube => Model([
+  static Model get cube =>
+      Model([
         Point3D(1, 0, 0),
         Point3D(1, 1, 0),
         Point3D(0, 1, 0),
@@ -219,7 +236,8 @@ class Model implements IPoints {
         [5, 4, 3],
       ]);
 
-  static get tetrahedron => Model([
+  static get tetrahedron =>
+      Model([
         Point3D(1, 0, 0),
         Point3D(0, 0, 1),
         Point3D(0, 1, 0),
@@ -231,7 +249,8 @@ class Model implements IPoints {
         [0, 1, 3]
       ]);
 
-  static get octahedron => Model([
+  static get octahedron =>
+      Model([
         Point3D(0.5, 1, 0.5),
         Point3D(0.5, 0.5, 1),
         Point3D(0, 0.5, 0.5),
@@ -251,7 +270,8 @@ class Model implements IPoints {
 
   static double phi = (1 + sqrt(5)) / 2;
 
-  static get icosahedron => Model(
+  static get icosahedron =>
+      Model(
           [
             Point3D(0, phi, 1), // 0
             Point3D(0, phi, -1), // 1
@@ -349,7 +369,8 @@ class Model implements IPoints {
     final buffer = StringBuffer();
     for (var point in points) {
       buffer.write(
-          "v ${point.x.toStringAsFixed(9)} ${point.y.toStringAsFixed(9)} ${point.z.toStringAsFixed(9)}\n");
+          "v ${point.x.toStringAsFixed(9)} ${point.y.toStringAsFixed(9)} ${point
+              .z.toStringAsFixed(9)}\n");
     }
     buffer.writeln();
     for (var polygonIndexes in polygonsByIndexes) {
@@ -369,7 +390,8 @@ class Model implements IPoints {
   static final _doubleRE = RegExp(r"[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?");
 
   static final RegExp _objVertexRE = RegExp(
-    "v (?<x>${_doubleRE.pattern}) (?<y>${_doubleRE.pattern}) (?<z>${_doubleRE.pattern})( ${_doubleRE.pattern})?\\D",
+    "v (?<x>${_doubleRE.pattern}) (?<y>${_doubleRE.pattern}) (?<z>${_doubleRE
+        .pattern})( ${_doubleRE.pattern})?\\D",
   );
 
   static final _intSlashRE = RegExp(r"([0-9]+)(/[0-9]*)?(/[0-9]+)?");

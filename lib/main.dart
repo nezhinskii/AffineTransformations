@@ -1,4 +1,3 @@
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -76,87 +75,120 @@ class _MainPageState extends State<MainPage> {
               return Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(
-                    width: 300,
-                    child: ToolBar()
-                  ),
+                  const SizedBox(width: 300, child: ToolBar()),
                   Expanded(
                     child: RepaintBoundary(
                       child: Stack(
                         children: [
-                          LayoutBuilder(
-                            builder: (context, constraints) {
-                              return Listener(
-                                onPointerSignal: (pointerSignal) {
-                                  if (pointerSignal is PointerScrollEvent) {
-                                    if (state is CommonState){
-                                      context.read<MainBloc>().add(CameraScaleEvent(pointerSignal.scrollDelta.dy));
-                                    }
-                                    if (state is FloatingHorizonState){
-                                      context.read<MainBloc>().add(FloatingHorizonScaleEvent(pointerSignal.scrollDelta.dy));
-                                    }
+                          LayoutBuilder(builder: (context, constraints) {
+                            return Listener(
+                              onPointerSignal: (pointerSignal) {
+                                if (pointerSignal is PointerScrollEvent) {
+                                  if (state is CommonState) {
+                                    context.read<MainBloc>().add(
+                                        CameraScaleEvent(
+                                            pointerSignal.scrollDelta.dy));
                                   }
-                                },
-                                child: GestureDetector(
-                                  onPanDown: state is CurveDrawingState ? (details) {
-                                    context.read<MainBloc>().add(CurvePanEvent(details.localPosition));
-                                  } :(details) {
-                                    _previousPosition = details.localPosition;
-                                  },
-                                  onPanEnd: state is CurveDrawingState ? (details) {
-                                    context.read<MainBloc>().add(CurvePanEvent(null, Size(constraints.maxWidth, constraints.maxHeight)));
-                                  }:(details) {
-                                    _previousPosition = null;
-                                  },
-                                  onPanUpdate: state is CurveDrawingState ? (details) {
-                                    context.read<MainBloc>().add(CurvePanEvent(details.localPosition));
-                                  }:(details) {
-                                    context.read<MainBloc>().add(CameraRotationEvent(details.localPosition - _previousPosition!));
-                                    _previousPosition = details.localPosition;
-                                  },
-                                  child: ClipRRect(
-                                    key: canvasAreaKey,
-                                    child: CustomPaint(
-                                      foregroundPainter: switch(state){
-                                        CurveDrawingState() => CurvePainter(
-                                          path: state.path
-                                        ),
-                                        FloatingHorizonState() => FloatingHorizonPainter(
-                                          camera: state.camera,
-                                          step: state.step,
-                                          max: state.max,
-                                          min: state.min,
-                                          func: state.func,
-                                          secretFeature: context.read<DiscoModel>().isEnabled,
-                                          pixelRatio: state.pixelRatio
-                                        ),
-                                        _ => AppPainter(
+                                  if (state is FloatingHorizonState) {
+                                    context.read<MainBloc>().add(
+                                        FloatingHorizonScaleEvent(
+                                            pointerSignal.scrollDelta.dy));
+                                  }
+                                }
+                              },
+                              child: GestureDetector(
+                                onPanDown: state is CurveDrawingState
+                                    ? (details) {
+                                        context.read<MainBloc>().add(
+                                            CurvePanEvent(
+                                                details.localPosition));
+                                      }
+                                    : (details) {
+                                        _previousPosition =
+                                            details.localPosition;
+                                      },
+                                onPanEnd: state is CurveDrawingState
+                                    ? (details) {
+                                        context.read<MainBloc>().add(
+                                            CurvePanEvent(
+                                                null,
+                                                Size(constraints.maxWidth,
+                                                    constraints.maxHeight)));
+                                      }
+                                    : (details) {
+                                        _previousPosition = null;
+                                      },
+                                onPanUpdate: state is CurveDrawingState
+                                    ? (details) {
+                                        context.read<MainBloc>().add(
+                                            CurvePanEvent(
+                                                details.localPosition));
+                                      }
+                                    : (details) {
+                                        context.read<MainBloc>().add(
+                                            CameraRotationEvent(
+                                                details.localPosition -
+                                                    _previousPosition!));
+                                        _previousPosition =
+                                            details.localPosition;
+                                      },
+                                child: ClipRRect(
+                                  key: canvasAreaKey,
+                                  child: CustomPaint(
+                                    foregroundPainter: switch (state) {
+                                      CurveDrawingState() =>
+                                        CurvePainter(path: state.path),
+                                      FloatingHorizonState() =>
+                                        FloatingHorizonPainter(
+                                            camera: state.camera,
+                                            step: state.step,
+                                            max: state.max,
+                                            min: state.min,
+                                            func: state.func,
+                                            secretFeature: context
+                                                .read<DiscoModel>()
+                                                .isEnabled,
+                                            pixelRatio: state.pixelRatio),
+                                      _ => AppPainter(
+                                          light: state.light,
+                                          lightMode: state.lightMode,
                                           camera: state.camera,
                                           polyhedron: state.model,
-                                          secretFeature: context.read<DiscoModel>().isEnabled
+                                          secretFeature: context
+                                              .read<DiscoModel>()
+                                              .isEnabled,
                                         ),
-                                      },
-                                      child: Container(
-                                        color: context.watch<DiscoModel>().isEnabled ?
-                                        context.watch<DiscoModel>().color : Theme.of(context).colorScheme.background,
-                                        width: double.infinity,
-                                        height: double.infinity,
-                                      ),
+                                    },
+                                    child: Container(
+                                      color: context
+                                              .watch<DiscoModel>()
+                                              .isEnabled
+                                          ? context.watch<DiscoModel>().color
+                                          : Theme.of(context)
+                                              .colorScheme
+                                              .background,
+                                      width: double.infinity,
+                                      height: double.infinity,
                                     ),
                                   ),
                                 ),
-                              );
-                            }
-                          ),
+                              ),
+                            );
+                          }),
                           Align(
                             alignment: Alignment.bottomRight,
                             child: Visibility(
                               visible: context.read<DiscoModel>().isEnabled,
                               child: SizedBox(
-                                height: MediaQuery.of(context).size.height / 2 - 100,
-                                width: MediaQuery.of(context).size.width / 2 - 200,
-                                child: Image.asset('assets/gifs/dance.gif', fit: BoxFit.contain,)
-                              ),
+                                  height:
+                                      MediaQuery.of(context).size.height / 2 -
+                                          100,
+                                  width: MediaQuery.of(context).size.width / 2 -
+                                      200,
+                                  child: Image.asset(
+                                    'assets/gifs/dance.gif',
+                                    fit: BoxFit.contain,
+                                  )),
                             ),
                           ),
                           Align(
@@ -164,10 +196,15 @@ class _MainPageState extends State<MainPage> {
                             child: Visibility(
                               visible: context.read<DiscoModel>().isEnabled,
                               child: SizedBox(
-                                height: MediaQuery.of(context).size.height / 2 - 100,
-                                width: MediaQuery.of(context).size.width / 2  - 200,
-                                child: Image.asset('assets/gifs/spongebob.gif', fit: BoxFit.contain,)
-                              ),
+                                  height:
+                                      MediaQuery.of(context).size.height / 2 -
+                                          100,
+                                  width: MediaQuery.of(context).size.width / 2 -
+                                      200,
+                                  child: Image.asset(
+                                    'assets/gifs/spongebob.gif',
+                                    fit: BoxFit.contain,
+                                  )),
                             ),
                           ),
                           Align(
@@ -175,10 +212,15 @@ class _MainPageState extends State<MainPage> {
                             child: Visibility(
                               visible: context.read<DiscoModel>().isEnabled,
                               child: SizedBox(
-                                height: MediaQuery.of(context).size.height / 2 - 100,
-                                width: MediaQuery.of(context).size.width / 2  - 200,
-                                child: Image.asset('assets/gifs/patrick.gif', fit: BoxFit.contain,)
-                              ),
+                                  height:
+                                      MediaQuery.of(context).size.height / 2 -
+                                          100,
+                                  width: MediaQuery.of(context).size.width / 2 -
+                                      200,
+                                  child: Image.asset(
+                                    'assets/gifs/patrick.gif',
+                                    fit: BoxFit.contain,
+                                  )),
                             ),
                           ),
                           Align(
@@ -186,10 +228,15 @@ class _MainPageState extends State<MainPage> {
                             child: Visibility(
                               visible: context.read<DiscoModel>().isEnabled,
                               child: SizedBox(
-                                height: MediaQuery.of(context).size.height / 2 - 100,
-                                width: MediaQuery.of(context).size.width / 2  - 200,
-                                child: Image.asset('assets/gifs/lizard.gif', fit: BoxFit.contain,)
-                              ),
+                                  height:
+                                      MediaQuery.of(context).size.height / 2 -
+                                          100,
+                                  width: MediaQuery.of(context).size.width / 2 -
+                                      200,
+                                  child: Image.asset(
+                                    'assets/gifs/lizard.gif',
+                                    fit: BoxFit.contain,
+                                  )),
                             ),
                           )
                         ],
