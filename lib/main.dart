@@ -161,13 +161,13 @@ class _MainPageState extends State<MainPage> {
                                           polyhedron: state.model.concat(
                                             Model.tetrahedron
                                                 .getTransformed(
+                                                    Matrix.scaling(Point3D(0.1, 0.1, 0.1)),
+                                                )
+                                                .getTransformed(
                                                   Matrix.translation(
                                                       state.light.pos),
                                                 )
-                                                .getTransformed(
-                                                  Matrix.scaling(
-                                                      Point3D(0.1, 0.1, 0.1)),
-                                                ),
+                                                ,
                                           ),
                                           secretFeature: context
                                               .read<DiscoModel>()

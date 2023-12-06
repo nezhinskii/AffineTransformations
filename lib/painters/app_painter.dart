@@ -106,63 +106,38 @@ class AppPainter extends CustomPainter {
     _zLabel.paint(canvas, MainBloc.point3DToOffset(zAxis.end, size));
 
     if (lightMode) {
-      final forNormals = SplayTreeMap<Point3D, List<Point3D>>(Point3D.comparator);
-      final normals = SplayTreeMap<Point3D, Point3D>(Point3D.comparator);
       for (int i = 0; i < projectedPolyhedron.polygons.length; ++i) {
         var curPolygon = polyhedron.polygons[i];
         var camVector = curPolygon.center - camera.eye;
         if (curPolygon.normal.dot(camVector) < 0) continue;
 
-        for (Point3D point in curPolygon.points) {
-          if (!forNormals.containsKey(point)) {
-            forNormals[point] = List<Point3D>.empty(growable: true);
-          }
-          forNormals[point]!.add(curPolygon.normal.normalized());
-        }
-      }
+        final normal = polyhedron.polygons[i].normal;
+        final intensity0 = max(normal.dot((polyhedron.polygons[i].points[0] - light.pos).normalized()), 0.0);
+        final intensity1 = max(normal.dot((polyhedron.polygons[i].points[1] - light.pos).normalized()), 0.0);
+        final intensity2 = max(normal.dot((polyhedron.polygons[i].points[2] - light.pos).normalized()), 0.0);
 
-      forNormals.forEach((point, normalsList) {
-        var x = 0.0;
-        var y = 0.0;
-        var z = 0.0;
-        for (var normal in normalsList) {
-          x += normal.x;
-          y += normal.y;
-          z += normal.z;
-        }
-        final len = normalsList.length;
-        normals[point] = Point3D(x / len, y / len, z / len);
-      });
-
-      for (int i = 0; i < projectedPolyhedron.polygons.length; ++i) {
-        var curPolygon = polyhedron.polygons[i];
-        var camVector = curPolygon.center - camera.eye;
-        if (curPolygon.normal.dot(camVector) < 0) continue;
-
-        final p0 = projectedPolyhedron.polygons[i].points[0];
-        final p1 = projectedPolyhedron.polygons[i].points[1];
-        final p2 = projectedPolyhedron.polygons[i].points[2];
-
-        double intensity0 = lambertIntensity(lightVector(p0), normals[p0]!);
-        double intensity1 = lambertIntensity(lightVector(p1), normals[p1]!);
-        double intensity2 = lambertIntensity(lightVector(p2), normals[p2]!);
-
-        Color color0 = Color.fromRGBO((light.color.x * intensity0).round(),
-            (light.color.y * intensity0).round(), (light.color.z * intensity0).round(), 1.0);
-        Color color1 = Color.fromRGBO((light.color.x * intensity1).round(),
-            (light.color.y * intensity1).round(), (light.color.z * intensity1).round(), 1.0);
-        Color color2 = Color.fromRGBO((light.color.x * intensity2).round(),
-            (light.color.y * intensity2).round(), (light.color.z * intensity2).round(), 1.0);
+        Color color0 = Color.fromRGBO(
+            (light.color.x * intensity0).round(),
+            (light.color.y * intensity0).round(),
+            (light.color.z * intensity0).round(), 1.0);
+        Color color1 = Color.fromRGBO(
+            (light.color.x * intensity1).round(),
+            (light.color.y * intensity1).round(),
+            (light.color.z * intensity1).round(), 1.0);
+        Color color2 = Color.fromRGBO(
+            (light.color.x * intensity2).round(),
+            (light.color.y * intensity2).round(),
+            (light.color.z * intensity2).round(), 1.0);
 
         drawShadedTriangle(
           size: size,
           canvas: canvas,
           color0: color0,
-          point3d0: p0,
+          point3d0: projectedPolyhedron.polygons[i].points[0],
           color1: color1,
-          point3d1: p1,
+          point3d1: projectedPolyhedron.polygons[i].points[1],
           color2: color2,
-          point3d2: p2,
+          point3d2: projectedPolyhedron.polygons[i].points[2],
           light: light,
         );
       }
@@ -181,6 +156,7 @@ class AppPainter extends CustomPainter {
       var curPolygon = polyhedron.polygons[i];
       var camVector = curPolygon.center - camera.eye;
       if (curPolygon.normal.dot(camVector) < 0) continue;
+      print('${polyhedron.polygons[i].points[0]}  ${polyhedron.polygons[i].points[1]}   ${polyhedron.polygons[i].points[2]}');
 
       drawTriangle(
         size: size,
