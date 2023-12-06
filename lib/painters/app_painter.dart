@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:math';
 import 'dart:ui';
 import 'package:graphics_lab6/models/light.dart';
@@ -105,8 +106,8 @@ class AppPainter extends CustomPainter {
     _zLabel.paint(canvas, MainBloc.point3DToOffset(zAxis.end, size));
 
     if (lightMode) {
-      Map<Point3D, List<Point3D>> forNormals = {};
-      Map<Point3D, Point3D> normals = {};
+      final forNormals = SplayTreeMap<Point3D, List<Point3D>>(Point3D.comparator);
+      final normals = SplayTreeMap<Point3D, Point3D>(Point3D.comparator);
       for (int i = 0; i < projectedPolyhedron.polygons.length; ++i) {
         var curPolygon = polyhedron.polygons[i];
         var camVector = curPolygon.center - camera.eye;
@@ -116,7 +117,7 @@ class AppPainter extends CustomPainter {
           if (!forNormals.containsKey(point)) {
             forNormals[point] = List<Point3D>.empty(growable: true);
           }
-          forNormals[point]!.add(curPolygon.normal);
+          forNormals[point]!.add(curPolygon.normal.normalized());
         }
       }
 
@@ -221,10 +222,13 @@ class AppPainter extends CustomPainter {
   }
 
   double lambertIntensity(Point3D lightVector, Point3D normal) {
-    return (lightVector.x * normal.x +
+    lightVector = lightVector.normalized();
+    normal = normal.normalized();
+    var cos =  (lightVector.x * normal.x +
             lightVector.y * normal.y +
             lightVector.z * normal.z) /
         (lightVector.length() * normal.length());
+    return max(0,cos);
   }
 
   static final _paint = Paint()
