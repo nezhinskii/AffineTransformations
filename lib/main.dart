@@ -159,15 +159,11 @@ class _MainPageState extends State<MainPage> {
                                           lightMode: state.lightMode,
                                           camera: state.camera,
                                           polyhedron: state.model.concat(
-                                            Model.tetrahedron
-                                                .getTransformed(
-                                                  Matrix.translation(
-                                                      state.light.pos),
-                                                )
-                                                .getTransformed(
-                                                  Matrix.scaling(
-                                                      Point3D(0.1, 0.1, 0.1)),
-                                                ),
+                                            Model.tetrahedron.getTransformed(
+                                              Matrix.translation(
+                                                state.light.pos,
+                                              ),
+                                            ),
                                           ),
                                           secretFeature: context
                                               .read<DiscoModel>()
