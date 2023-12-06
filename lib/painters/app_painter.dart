@@ -218,7 +218,7 @@ class AppPainter extends CustomPainter {
 
   Point3D lightVector(Point3D point) {
     return Point3D(
-        light.pos.x - point.x, light.pos.y - point.y, light.pos.z - point.z);
+        - light.pos.x + point.x, - light.pos.y + point.y, - light.pos.z + point.z); //?
   }
 
   double lambertIntensity(Point3D lightVector, Point3D normal) {

@@ -1,12 +1,16 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:graphics_lab6/models/light.dart';
 import 'package:graphics_lab6/painters/app_painter.dart';
 import 'package:graphics_lab6/bloc/main_bloc.dart';
 import 'package:graphics_lab6/models/disco_model.dart';
 import 'package:graphics_lab6/painters/curve_painter.dart';
 import 'package:graphics_lab6/painters/floating_horizon_painter.dart';
 import 'package:graphics_lab6/widgets/toolbar.dart';
+
+import 'models/matrix.dart';
+import 'models/primtives.dart';
 
 void main() {
   runApp(const MyApp());
@@ -150,10 +154,21 @@ class _MainPageState extends State<MainPage> {
                                                 .isEnabled,
                                             pixelRatio: state.pixelRatio),
                                       _ => AppPainter(
+                                          //light: Light(pos: state.camera.eye),
                                           light: state.light,
                                           lightMode: state.lightMode,
                                           camera: state.camera,
-                                          polyhedron: state.model,
+                                          polyhedron: state.model.concat(
+                                            Model.tetrahedron
+                                                .getTransformed(
+                                                  Matrix.translation(
+                                                      state.light.pos),
+                                                )
+                                                .getTransformed(
+                                                  Matrix.scaling(
+                                                      Point3D(0.1, 0.1, 0.1)),
+                                                ),
+                                          ),
                                           secretFeature: context
                                               .read<DiscoModel>()
                                               .isEnabled,
