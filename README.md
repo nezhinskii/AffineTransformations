@@ -1,4 +1,4 @@
-# graphics_lab6
+# AffineTransformations
 
 A new Flutter project.
 
